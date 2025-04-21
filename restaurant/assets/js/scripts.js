@@ -136,6 +136,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const menuGrid = document.getElementById("menu-grid");
   const cartSidebar = document.getElementById("cart-sidebar");
   const cartToggle = document.querySelector(".cart-toggle");
+  const cartClose = document.querySelector(".cart-close");
   const cartItemsContainer = document.getElementById("cart-items");
   const cartTotal = document.getElementById("cart-total");
   const cartCount = document.getElementById("cart-count");
@@ -163,9 +164,10 @@ document.addEventListener("DOMContentLoaded", () => {
       cartItemsContainer.innerHTML = "<p>Your cart is empty.</p>";
       placeOrderBtn.disabled = true;
     } else {
-      data.cart.forEach((item) => {
+      data.cart.forEach((item, index) => {
         const div = document.createElement("div");
         div.className = "cart-item";
+        div.style.animationDelay = `${index * 0.1}s`;
         div.innerHTML = `
                   <span>${item.name} ($${Number(item.price).toFixed(2)})</span>
                   <div class="quantity-controls">
@@ -186,6 +188,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     cartTotal.textContent = `Total: $${data.total}`;
     cartCount.textContent = data.cart_count;
+    if (data.cart_count > 0) {
+      cartCount.classList.add("pulse");
+      setTimeout(() => cartCount.classList.remove("pulse"), 500);
+    }
   }
 
   // Update modal UI
@@ -269,6 +275,20 @@ document.addEventListener("DOMContentLoaded", () => {
         cartSidebar.classList.toggle("active");
       });
     }
+
+    // Cart close
+    if (cartClose) {
+      cartClose.addEventListener("click", () => {
+        cartSidebar.classList.remove("active");
+      });
+    }
+
+    // Close cart on Escape key
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && cartSidebar.classList.contains("active")) {
+        cartSidebar.classList.remove("active");
+      }
+    });
 
     // Cart actions
     if (cartItemsContainer) {

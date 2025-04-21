@@ -64,8 +64,12 @@ $csrf_token = generateCsrfToken();
 
     <!-- Cart Sidebar -->
     <div class="cart-sidebar" id="cart-sidebar">
-        <button class="cart-toggle" aria-label="Toggle cart">🛒 Cart (<span id="cart-count">0</span>)</button>
+        <button class="cart-toggle" aria-label="Toggle cart">
+            <span class="cart-icon">🛒</span>
+            <span class="cart-count" id="cart-count">0</span>
+        </button>
         <div class="cart-content">
+            <button class="cart-close" aria-label="Close cart">✕</button>
             <h2>Your Cart</h2>
             <div id="cart-items"></div>
             <p id="cart-total">Total: $0.00</p>
