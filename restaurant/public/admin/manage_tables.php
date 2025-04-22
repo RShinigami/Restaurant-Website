@@ -232,7 +232,7 @@ foreach ($reservations as $res) {
         }
 
         .table th, .table td {
-            padding: 1rem;
+            padding: 1.2rem;
             border: 1px solid #e0e0e0;
             text-align: left;
         }
@@ -245,6 +245,20 @@ foreach ($reservations as $res) {
 
         .table td {
             background: #fafafa;
+            transition: background 0.3s;
+        }
+
+        .table tr:nth-child(even) td {
+            background: #f5f5f5;
+        }
+
+        .table tr:hover td {
+            background: #f0f0f0;
+        }
+
+        .table td.actions {
+            text-align: center;
+            white-space: nowrap;
         }
 
         .table td ul {
@@ -254,8 +268,9 @@ foreach ($reservations as $res) {
         }
 
         .table td li {
-            margin: 0.3rem 0;
+            margin: 0.5rem 0;
             color: #555;
+            font-size: 0.95rem;
         }
 
         .table .btn {
@@ -352,6 +367,10 @@ foreach ($reservations as $res) {
             .table {
                 font-size: 0.9rem;
             }
+
+            .form-group input {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -393,7 +412,7 @@ foreach ($reservations as $res) {
                             <th>Capacity</th>
                             <th>Description</th>
                             <th>Upcoming Reservations</th>
-                            <th>Actions</th>
+                            <th class="actions">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -420,7 +439,7 @@ foreach ($reservations as $res) {
                                         }
                                         ?>
                                     </td>
-                                    <td>
+                                    <td class="actions">
                                         <button class="btn edit-btn" data-table='<?php echo json_encode($table); ?>'><i class="fas fa-edit"></i> Edit</button>
                                         <form method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this table?');">
                                             <input type="hidden" name="action" value="delete">
