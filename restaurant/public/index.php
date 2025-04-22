@@ -3,8 +3,16 @@ require_once '../config/db.php';
 require_once '../includes/functions.php';
 secureSessionStart();
 
-// Define categories
-$categories = ['Appetizer', 'Salad', 'Main Course', 'Pasta', 'Pizza', 'Dessert', 'Beverage', 'Side'];
+if (isAdmin()) {
+    // Redirect to admin dashboard if logged in as admin
+    header('Location: admin/dashboard.php');
+    exit;
+}
+// Fetch categories
+$categories = [];
+$stmt = $db->query('SELECT DISTINCT category FROM menu_items ORDER BY category');
+$categories = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
 
 // Fetch all items per category for preview (all users)
 $preview_items = [];
