@@ -130,3 +130,13 @@
 
 -- -- Create index for faster overlap checks
 -- CREATE INDEX idx_reservations_table_date ON reservations_orders(table_number, date_time);
+
+
+-- CREATE TABLE IF NOT EXISTS order_items (
+--     order_id INTEGER,
+--     menu_id INTEGER,
+--     quantity INTEGER NOT NULL CHECK(quantity > 0),
+--     FOREIGN KEY (order_id) REFERENCES reservations_orders(id),
+--     FOREIGN KEY (menu_id) REFERENCES menu_items(item_id)
+-- );
+

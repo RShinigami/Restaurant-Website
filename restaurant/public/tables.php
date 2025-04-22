@@ -1,10 +1,10 @@
 <?php
-require_once '../../config/db.php';
-require_once '../../includes/functions.php';
+require_once '../config/db.php';
+require_once '../includes/functions.php';
 secureSessionStart();
 
 // Restrict to admin users
-if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== 1) {
+if (!isset($_SESSION['is_admin']) || !$_SESSION['is_admin']) {
     header('Location: ../login.php');
     exit;
 }

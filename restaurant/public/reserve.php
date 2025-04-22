@@ -9,101 +9,107 @@ if (!isLoggedIn()) {
     exit;
 }
 
-// Initialize status for toast
-$reservation_status = ['message' => '', 'type' => ''];
+// Handle AJAX reservation submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'submit_reservation') {
+    header('Content-Type: application/json');
+    $response = ['success' => false, 'message' => ''];
 
-// Handle reservation submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_reservation'])) {
     if (!validateCsrfToken($_POST['csrf_token'])) {
-        $reservation_status = ['message' => 'Invalid CSRF token.', 'type' => 'error'];
-    } else {
-        $date = filter_input(INPUT_POST, 'date', FILTER_SANITIZE_SPECIAL_CHARS);
-        $time = filter_input(INPUT_POST, 'time', FILTER_SANITIZE_SPECIAL_CHARS);
-        $party_size = filter_input(INPUT_POST, 'party_size', FILTER_VALIDATE_INT);
-        $table_number = filter_input(INPUT_POST, 'table_number', FILTER_VALIDATE_INT);
-        $special_requests = filter_input(INPUT_POST, 'special_requests', FILTER_SANITIZE_SPECIAL_CHARS);
+        $response['message'] = 'Invalid CSRF token.';
+        echo json_encode($response);
+        exit;
+    }
 
-        // Validate inputs
-        $errors = [];
-        $date_time = DateTime::createFromFormat('Y-m-d h:i A', "$date $time");
-        if (!$date_time || $date_time < new DateTime('tomorrow')) {
-            $errors[] = 'Invalid or past date/time.';
-        }
-        if ($party_size < 1) {
-            $errors[] = 'Invalid party size.';
-        }
+    $date = filter_input(INPUT_POST, 'date', FILTER_SANITIZE_SPECIAL_CHARS);
+    $time = filter_input(INPUT_POST, 'time', FILTER_SANITIZE_SPECIAL_CHARS);
+    $party_size = filter_input(INPUT_POST, 'party_size', FILTER_VALIDATE_INT);
+    $table_number = filter_input(INPUT_POST, 'table_number', FILTER_VALIDATE_INT);
+    $special_requests = filter_input(INPUT_POST, 'special_requests', FILTER_SANITIZE_SPECIAL_CHARS);
 
-        // Check table existence and capacity
-        $stmt = $db->prepare('SELECT capacity FROM tables WHERE table_number = ?');
-        $stmt->execute([$table_number]);
-        $table = $stmt->fetch(PDO::FETCH_ASSOC);
-        if (!$table) {
-            $errors[] = 'Invalid table number.';
-        } elseif ($party_size > $table['capacity']) {
-            $errors[] = 'Party size exceeds table capacity.';
-        }
+    // Validate inputs
+    $errors = [];
+    $date_time = DateTime::createFromFormat('Y-m-d h:i A', "$date $time");
+    if (!$date_time || $date_time < new DateTime('tomorrow')) {
+        $errors[] = 'Invalid or past date/time.';
+    }
+    if ($party_size < 1) {
+        $errors[] = 'Invalid party size.';
+    }
 
-        // Check for overlapping reservations
-        if (empty($errors)) {
-            $duration_hours = $party_size <= 4 ? 1 : 2;
-            $start_time = $date_time->format('Y-m-d H:i:s');
-            $end_time = (clone $date_time)->modify("+$duration_hours hours")->format('Y-m-d H:i:s');
-            $stmt = $db->prepare('
-                SELECT COUNT(*) 
-                FROM reservations_orders 
-                WHERE type = ? 
-                AND table_number = ? 
-                AND status IN (?, ?) 
-                AND (
-                    (date_time >= ? AND date_time < ?) 
-                    OR 
-                    (date_time <= ? AND datetime(date_time, \'+\' || ? || \' hours\') > ?)
-                )
-            ');
-            $stmt->execute([
-                'reservation',
-                $table_number,
-                'pending',
-                'confirmed',
-                $start_time,
-                $end_time,
-                $start_time,
-                $duration_hours,
-                $start_time
-            ]);
-            if ($stmt->fetchColumn() > 0) {
-                $errors[] = 'Table is already reserved for this time.';
-            }
-        }
+    // Check table existence and capacity
+    $stmt = $db->prepare('SELECT capacity FROM tables WHERE table_number = ?');
+    $stmt->execute([$table_number]);
+    $table = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (!$table) {
+        $errors[] = 'Invalid table number.';
+    } elseif ($party_size > $table['capacity']) {
+        $errors[] = 'Party size exceeds table capacity.';
+    }
 
-        if (empty($errors)) {
-            try {
-                $stmt = $db->prepare('
-                    INSERT INTO reservations_orders 
-                    (customer_id, type, date_time, status, table_number, special_requests) 
-                    VALUES (?, ?, ?, ?, ?, ?)
-                ');
-                $stmt->execute([
-                    $_SESSION['customer_id'],
-                    'reservation',
-                    $date_time->format('Y-m-d H:i:s'),
-                    'pending',
-                    $table_number,
-                    $special_requests ?: null
-                ]);
-                $reservation_status = ['message' => 'Reservation confirmed!', 'type' => 'success'];
-            } catch (PDOException $e) {
-                $errors[] = 'Failed to make reservation: ' . $e->getMessage();
-            }
-        }
-
-        if (!empty($errors)) {
-            $reservation_status = ['message' => implode(' ', $errors), 'type' => 'error'];
+    // Check for overlapping reservations
+    if (empty($errors)) {
+        $duration_hours = $party_size <= 4 ? 1 : 2;
+        $start_time = $date_time->format('Y-m-d H:i:s');
+        $end_time = (clone $date_time)->modify("+$duration_hours hours")->format('Y-m-d H:i:s');
+        $stmt = $db->prepare('
+            SELECT COUNT(*) 
+            FROM reservations_orders 
+            WHERE type = ? 
+            AND table_number = ? 
+            AND status IN (?, ?) 
+            AND (
+                (date_time >= ? AND date_time < ?) 
+                OR 
+                (date_time <= ? AND datetime(date_time, \'+\' || ? || \' hours\') > ?)
+            )
+        ');
+        $stmt->execute([
+            'reservation',
+            $table_number,
+            'pending',
+            'confirmed',
+            $start_time,
+            $end_time,
+            $start_time,
+            $duration_hours,
+            $start_time
+        ]);
+        if ($stmt->fetchColumn() > 0) {
+            $errors[] = 'Table is already reserved for this time.';
         }
     }
+
+    if (empty($errors)) {
+        try {
+            $stmt = $db->prepare('
+                INSERT INTO reservations_orders 
+                (customer_id, type, date_time, status, table_number, special_requests) 
+                VALUES (?, ?, ?, ?, ?, ?)
+            ');
+            $stmt->execute([
+                $_SESSION['customer_id'],
+                'reservation',
+                $date_time->format('Y-m-d H:i:s'),
+                'pending',
+                $table_number,
+                $special_requests ?: null
+            ]);
+            $response['success'] = true;
+            $response['message'] = 'Reservation confirmed! Redirecting to your account...';
+        } catch (PDOException $e) {
+            $errors[] = 'Failed to make reservation: ' . $e->getMessage();
+        }
+    }
+
+    if (!empty($errors)) {
+        $response['message'] = implode(' ', $errors);
+    }
+
+    echo json_encode($response);
+    exit;
 }
 
-// Generate CSRF token after POST to avoid reuse
+// Generate CSRF token
 $csrf_token = generateCsrfToken();
 
 // Operating hours and time slots
@@ -175,16 +181,10 @@ for ($time = $start_time; $time <= $end_time; $time += 30 * 60) {
             <p><strong>Party Size:</strong> <span id="modal-party-size"></span></p>
             <p><strong>Table:</strong> <span id="modal-table"></span></p>
             <p><strong>Special Requests:</strong> <span id="modal-requests"></span></p>
-            <form id="confirm-reservation-form" method="POST" action="reserve.php">
-                <input type="hidden" name="csrf_token" value="<?php echo sanitize($csrf_token); ?>">
-                <input type="hidden" name="date" id="confirm-date">
-                <input type="hidden" name="time" id="confirm-time">
-                <input type="hidden" name="party_size" id="confirm-party-size">
-                <input type="hidden" name="table_number" id="confirm-table-number">
-                <input type="hidden" name="special_requests" id="confirm-special-requests">
-                <button type="submit" class="btn" name="submit_reservation">Confirm Reservation</button>
+            <div class="modal-buttons">
+                <button type="button" class="btn" id="confirm-reservation-btn">Confirm Reservation</button>
                 <button type="button" class="btn" id="cancel-reservation-btn">Cancel</button>
-            </form>
+            </div>
         </div>
     </div>
 
@@ -203,24 +203,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const alternativeTimes = document.getElementById('alternative-times');
     const reserveBtn = document.getElementById('reserve-btn');
     const modal = document.getElementById('reservation-modal');
-    const confirmForm = document.getElementById('confirm-reservation-form');
+    const confirmBtn = document.getElementById('confirm-reservation-btn');
     const cancelBtn = document.getElementById('cancel-reservation-btn');
-
-    // Show toast if reservation status exists
-    <?php if ($reservation_status['message']): ?>
-        showToast(<?php echo json_encode($reservation_status['message']); ?>, <?php echo json_encode($reservation_status['type']); ?>);
-        <?php if ($reservation_status['type'] === 'success'): ?>
-            // Reset form and redirect to account.php after toast
-            form.reset();
-            tableSelect.disabled = true;
-            tableSelect.innerHTML = '<option value="">Select Table</option>';
-            availabilityMessage.textContent = '';
-            alternativeTimes.innerHTML = '';
-            setTimeout(() => {
-                window.location.href = 'account.php';
-            }, 2000);
-        <?php endif; ?>
-    <?php endif; ?>
 
     // Check availability on input change
     const checkAvailability = () => {
@@ -302,13 +286,46 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('modal-table').textContent = tableSelect.options[tableSelect.selectedIndex].text;
         document.getElementById('modal-requests').textContent = document.getElementById('special-requests').value || 'None';
 
-        document.getElementById('confirm-date').value = dateInput.value;
-        document.getElementById('confirm-time').value = timeSelect.value;
-        document.getElementById('confirm-party-size').value = partySizeSelect.value;
-        document.getElementById('confirm-table-number').value = tableSelect.value;
-        document.getElementById('confirm-special-requests').value = document.getElementById('special-requests').value;
-
         modal.classList.add('active');
+    });
+
+    // Handle confirm reservation via AJAX
+    confirmBtn.addEventListener('click', () => {
+        const formData = new FormData();
+        formData.append('action', 'submit_reservation');
+        formData.append('csrf_token', <?php echo json_encode(sanitize($csrf_token)); ?>);
+        formData.append('date', dateInput.value);
+        formData.append('time', timeSelect.value);
+        formData.append('party_size', partySizeSelect.value);
+        formData.append('table_number', tableSelect.value);
+        formData.append('special_requests', document.getElementById('special-requests').value);
+
+        fetch('/public/reserve.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            showToast(data.message, data.success ? 'success' : 'error');
+            modal.classList.remove('active');
+            if (data.success) {
+                // Reset form and UI
+                form.reset();
+                tableSelect.disabled = true;
+                tableSelect.innerHTML = '<option value="">Select Table</option>';
+                availabilityMessage.textContent = '';
+                alternativeTimes.innerHTML = '';
+                // Redirect to account.php after toast
+                setTimeout(() => {
+                    window.location.href = 'account.php';
+                }, 2000);
+            }
+        })
+        .catch(error => {
+            showToast('Error submitting reservation.', 'error');
+            modal.classList.remove('active');
+            console.error('Fetch error:', error);
+        });
     });
 
     // Handle modal interactions
@@ -343,6 +360,12 @@ function showToast(message, type) {
 }
 .alternative-times li:hover {
     text-decoration: underline;
+}
+.modal-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 1rem;
 }
 </style>
 

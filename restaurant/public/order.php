@@ -25,6 +25,61 @@ if (!isset($_SESSION['cart'])) {
 
 // Generate CSRF token
 $csrf_token = generateCsrfToken();
+
+// Handle AJAX order submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'submit_order') {
+    header('Content-Type: application/json');
+    $response = ['success' => false, 'message' => ''];
+
+    if (!validateCsrfToken($_POST['csrf_token'])) {
+        $response['message'] = 'Invalid CSRF token.';
+        echo json_encode($response);
+        exit;
+    }
+
+    if (empty($_SESSION['cart'])) {
+        $response['message'] = 'Cart is empty!';
+        echo json_encode($response);
+        exit;
+    }
+
+    try {
+        $db->beginTransaction();
+
+        // Insert order into reservations_orders
+        $stmt = $db->prepare('
+            INSERT INTO reservations_orders (customer_id, type, date_time, status)
+            VALUES (?, ?, ?, ?)
+        ');
+        $stmt->execute([
+            $_SESSION['customer_id'],
+            'order',
+            date('Y-m-d H:i'),
+            'pending'
+        ]);
+        $order_id = $db->lastInsertId();
+
+        // Insert order items
+        $stmt = $db->prepare('
+            INSERT INTO order_items (order_id, menu_id, quantity)
+            VALUES (?, ?, ?)
+        ');
+        foreach ($_SESSION['cart'] as $item_id => $quantity) {
+            $stmt->execute([$order_id, $item_id, $quantity]);
+        }
+
+        $db->commit();
+        $_SESSION['cart'] = []; // Clear cart
+        $response['success'] = true;
+        $response['message'] = 'Order placed successfully! Redirecting to your account...';
+    } catch (PDOException $e) {
+        $db->rollBack();
+        $response['message'] = 'Failed to place order: ' . $e->getMessage();
+    }
+
+    echo json_encode($response);
+    exit;
+}
 ?>
 
 <?php include '../includes/header.php'; ?>
@@ -84,11 +139,10 @@ $csrf_token = generateCsrfToken();
             <h2>Confirm Your Order</h2>
             <div id="modal-cart-items"></div>
             <p id="modal-cart-total">Total: $0.00</p>
-            <form id="order-form" method="POST" action="order.php">
-                <input type="hidden" name="csrf_token" value="<?php echo sanitize($csrf_token); ?>">
-                <button type="submit" class="btn" name="submit_order">Submit Order</button>
-                <button type="button" class="btn" id="cancel-order-btn">Cancel</button>
-            </form>
+            <div class="modal-buttons">
+                <button class="btn" id="submit-order-btn" data-csrf="<?php echo sanitize($csrf_token); ?>">Submit Order</button>
+                <button class="btn" id="cancel-order-btn">Cancel</button>
+            </div>
         </div>
     </div>
 
@@ -96,38 +150,54 @@ $csrf_token = generateCsrfToken();
     <div class="toast" id="toast"></div>
 </section>
 
-<?php
-// Handle order submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_order'])) {
-    if (!validateCsrfToken($_POST['csrf_token'])) {
-        die('Invalid CSRF token.');
-    }
-    if (!empty($_SESSION['cart'])) {
-        try {
-            $db->beginTransaction();
-            foreach ($_SESSION['cart'] as $item_id => $quantity) {
-                $stmt = $db->prepare('INSERT INTO reservations_orders (customer_id, type, item_id, quantity, date_time, status) VALUES (?, ?, ?, ?, ?, ?)');
-                $stmt->execute([
-                    $_SESSION['customer_id'],
-                    'order',
-                    $item_id,
-                    $quantity,
-                    date('Y-m-d H:i:s'),
-                    'pending'
-                ]);
-            }
-            $db->commit();
-            $_SESSION['cart'] = []; // Clear cart
-            echo '<script>showToast("Order placed successfully!", "success"); setTimeout(() => location.reload(), 2000);</script>';
-        } catch (PDOException $e) {
-            $db->rollBack();
-            echo '<script>showToast("Failed to place order: ' . addslashes($e->getMessage()) . '", "error");</script>';
-        }
-    } else {
-        echo '<script>showToast("Cart is empty!", "error");</script>';
-    }
+<script>
+// Toast notification (inline to avoid scripts.js dependency for this page)
+function showToast(message, type) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = `toast ${type} active`;
+    setTimeout(() => { toast.className = 'toast'; }, 3000);
 }
-?>
+
+// Move order submission to inline script to ensure CSRF token access
+document.addEventListener('DOMContentLoaded', () => {
+    const submitOrderBtn = document.getElementById('submit-order-btn');
+    const orderModal = document.getElementById('order-modal');
+
+    if (submitOrderBtn) {
+        submitOrderBtn.addEventListener('click', () => {
+            const formData = new FormData();
+            formData.append('action', 'submit_order');
+            formData.append('csrf_token', submitOrderBtn.dataset.csrf);
+
+            fetch('/public/order.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                showToast(data.message, data.success ? 'success' : 'error');
+                if (data.success) {
+                    orderModal.classList.remove('active');
+                    // Update cart UI
+                    document.getElementById('cart-items').innerHTML = '<p>Your cart is empty.</p>';
+                    document.getElementById('cart-total').textContent = 'Total: $0.00';
+                    document.getElementById('cart-count').textContent = '0';
+                    document.getElementById('place-order-btn').disabled = true;
+                    // Redirect to account.php
+                    setTimeout(() => {
+                        window.location.href = 'account.php';
+                    }, 2000);
+                }
+            })
+            .catch(error => {
+                showToast('Error submitting order: ' + error, 'error');
+                console.error('Fetch error:', error);
+            });
+        });
+    }
+});
+</script>
 
 <?php include '../includes/footer.php'; ?>
 </main>

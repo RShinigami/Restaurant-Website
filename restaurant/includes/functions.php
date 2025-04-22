@@ -18,8 +18,9 @@ function isLoggedIn() {
 
 // Check if user is admin
 function isAdmin() {
-    return isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === 1;
+    return isset($_SESSION['is_admin']) && $_SESSION['is_admin'];
 }
+
 // Generate CSRF token
 function generateCsrfToken() {
     if (empty($_SESSION['csrf_token'])) {
