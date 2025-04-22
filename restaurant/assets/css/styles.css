@@ -425,10 +425,18 @@ button {
   font-size: 1rem;
   cursor: pointer;
   transition: background-color 0.3s, transform 0.2s;
+  -webkit-transition: background-color 0.3s, transform 0.2s;
+  -moz-transition: background-color 0.3s, transform 0.2s;
+  -ms-transition: background-color 0.3s, transform 0.2s;
+  -o-transition: background-color 0.3s, transform 0.2s;
 }
 button:hover {
   background-color: #8b1a1a;
   transform: scale(1.05);
+  -webkit-transform: scale(1.05);
+  -moz-transform: scale(1.05);
+  -ms-transform: scale(1.05);
+  -o-transform: scale(1.05);
 }
 button:active {
   transform: scale(0.95);
@@ -666,6 +674,9 @@ button:active {
   font-size: 1.5rem;
   cursor: pointer;
   transition: transform 0.2s;
+}
+.cart-close:hover {
+  background-color: #a52a2a;
 }
 
 .cart-content {
