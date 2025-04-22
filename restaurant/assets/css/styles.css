@@ -5,12 +5,12 @@ body {
   background-color: #f9f9f9;
   color: #333;
   line-height: 1.6;
-  margin: 0; /* Ensure no default margin */
+  margin: 0;
 }
 
 /* Navigation */
 header {
-  background-color: #a52a2a; /* Brown-red */
+  background-color: #a52a2a;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   position: sticky;
   top: 0;
@@ -54,7 +54,7 @@ nav ul li a {
   font-weight: 500;
 }
 nav ul li a:hover {
-  color: #ffd700; /* Gold */
+  color: #ffd700;
 }
 .logout-link {
   color: #ffd700;
@@ -394,7 +394,9 @@ nav ul li a:hover {
   font-weight: 500;
   color: #333;
 }
-.form-group input {
+.form-group input,
+.form-group select,
+.form-group textarea {
   width: 100%;
   padding: 0.8rem;
   border: 1px solid #ccc;
@@ -403,10 +405,15 @@ nav ul li a:hover {
   background-color: #fff;
   color: #333;
 }
-.form-group input:focus {
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
   outline: none;
   border-color: #a52a2a;
   box-shadow: 0 0 5px rgba(165, 42, 42, 0.3);
+}
+.form-group textarea {
+  resize: vertical;
 }
 button {
   width: 25%;
@@ -532,7 +539,58 @@ button:active {
   gap: 1.5rem;
 }
 
-/* Cart Sidebar */
+/* Reserve Page */
+.reserve-page {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 1rem;
+}
+.reserve-page h1 {
+  color: #a52a2a;
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 2.5rem;
+}
+.reservation-form {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+.reservation-form .form-group {
+  margin-bottom: 1.5rem;
+}
+.reservation-form label {
+  font-weight: 500;
+  color: #a52a2a;
+}
+.reservation-form input[type="date"],
+.reservation-form select,
+.reservation-form textarea {
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.availability-message {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+}
+.availability-message.success {
+  color: #2e7d32;
+}
+.availability-message.error {
+  color: #d32f2f;
+}
+#reserve-btn {
+  width: 100%;
+  background: #ffd700;
+  color: #a52a2a;
+}
+#reserve-btn:hover {
+  background: #e6c200;
+}
+
+/* Cart Sidebar (for order page only) */
 .cart-sidebar {
   position: fixed;
   top: 0;
@@ -608,12 +666,10 @@ button:active {
   font-size: 1.5rem;
   cursor: pointer;
   transition: transform 0.2s;
-  -webkit-transition: transform 0.2s;
-  -moz-transition: transform 0.2s;
-  -ms-transition: transform 0.2s;
-  -o-transition: transform 0.2s;
 }
-
+.cart-close:hover {
+  transform: rotate(90deg);
+}
 .cart-content {
   padding: 3rem 2rem 2rem;
   height: 100%;
@@ -641,20 +697,11 @@ button:active {
   opacity: 0;
   transform: translateY(10px);
   animation: slideIn 0.3s forwards;
-  -webkit-transform: translateY(10px);
-  -moz-transform: translateY(10px);
-  -ms-transform: translateY(10px);
-  -o-transform: translateY(10px);
-  -webkit-animation: slideIn 0.3s forwards;
 }
 @keyframes slideIn {
   to {
     opacity: 1;
     transform: translateY(0);
-    -webkit-transform: translateY(0);
-    -moz-transform: translateY(0);
-    -ms-transform: translateY(0);
-    -o-transform: translateY(0);
   }
 }
 .cart-item span {
@@ -731,6 +778,16 @@ button:active {
   color: #a52a2a;
   margin-bottom: 1rem;
 }
+.modal-content p {
+  margin: 0.5rem 0;
+}
+.modal-content p span {
+  font-weight: 500;
+}
+#modal-requests:empty::after {
+  content: "None";
+  color: #666;
+}
 .modal-cart-item {
   display: flex;
   justify-content: space-between;
@@ -744,9 +801,11 @@ button:active {
   font-weight: bold;
   margin: 1rem 0;
 }
-#order-form {
+#order-form,
+#confirm-reservation-form {
   display: flex;
   gap: 1rem;
+  margin-top: 1rem;
 }
 
 /* Toast Notification */
@@ -895,6 +954,22 @@ footer {
     font-size: 1.1rem;
     padding: 1rem;
   }
+  .reservation-form {
+    padding: 1.5rem;
+  }
+  .reservation-form input,
+  .reservation-form select,
+  .reservation-form textarea {
+    font-size: 1.1rem;
+    padding: 1rem;
+  }
+  .reservation-form .form-group {
+    margin-bottom: 1.2rem;
+  }
+  #reserve-btn {
+    height: 50px;
+    font-size: 1.1rem;
+  }
   .cart-sidebar {
     width: 100%;
     top: 0;
@@ -925,6 +1000,10 @@ footer {
     width: 60px;
     font-size: 1.1rem;
     padding: 0.8rem;
+  }
+  .modal-content {
+    padding: 1.5rem;
+    width: 95%;
   }
   #place-order-btn,
   #clear-cart-btn {

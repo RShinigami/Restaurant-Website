@@ -130,103 +130,127 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Order page functionality
-  const categoryFilter = document.getElementById("category-filter");
-  const searchFilter = document.getElementById("search-filter");
-  const menuGrid = document.getElementById("menu-grid");
-  const cartSidebar = document.getElementById("cart-sidebar");
-  const cartToggle = document.querySelector(".cart-toggle");
-  const cartClose = document.querySelector(".cart-close");
-  const cartItemsContainer = document.getElementById("cart-items");
-  const cartTotal = document.getElementById("cart-total");
-  const cartCount = document.getElementById("cart-count");
-  const placeOrderBtn = document.getElementById("place-order-btn");
-  const clearCartBtn = document.getElementById("clear-cart-btn");
-  const orderModal = document.getElementById("order-modal");
-  const modalCartItems = document.getElementById("modal-cart-items");
-  const modalCartTotal = document.getElementById("modal-cart-total");
-  const cancelOrderBtn = document.getElementById("cancel-order-btn");
-
   // Show toast notification
   function showToast(message, type) {
     const toast = document.getElementById("toast");
-    toast.textContent = message;
-    toast.className = `toast ${type} active`;
-    setTimeout(() => {
-      toast.className = "toast";
-    }, 3000);
+    if (toast) {
+      toast.textContent = message;
+      toast.className = `toast ${type} active`;
+      setTimeout(() => {
+        toast.className = "toast";
+      }, 3000);
+    }
   }
 
-  // Update cart UI
+  // Update cart UI (for order page)
   function updateCartUI(data) {
-    cartItemsContainer.innerHTML = "";
-    if (data.cart.length === 0) {
-      cartItemsContainer.innerHTML = "<p>Your cart is empty.</p>";
-      placeOrderBtn.disabled = true;
-    } else {
-      data.cart.forEach((item, index) => {
-        const div = document.createElement("div");
-        div.className = "cart-item";
-        div.style.animationDelay = `${index * 0.1}s`;
-        div.innerHTML = `
-                  <span>${item.name} ($${Number(item.price).toFixed(2)})</span>
-                  <div class="quantity-controls">
-                      <button class="decrement" data-item-id="${
-                        item.item_id
-                      }">-</button>
-                      <input type="number" value="${
-                        item.quantity
-                      }" min="0" data-item-id="${item.item_id}">
-                      <button class="increment" data-item-id="${
-                        item.item_id
-                      }">+</button>
-                  </div>
-              `;
-        cartItemsContainer.appendChild(div);
-      });
-      placeOrderBtn.disabled = false;
+    const cartItemsContainer = document.getElementById("cart-items");
+    const cartTotal = document.getElementById("cart-total");
+    const cartCount = document.getElementById("cart-count");
+    const placeOrderBtn = document.getElementById("place-order-btn");
+    if (cartItemsContainer && cartTotal && cartCount && placeOrderBtn) {
+      cartItemsContainer.innerHTML = "";
+      if (data.cart.length === 0) {
+        cartItemsContainer.innerHTML = "<p>Your cart is empty.</p>";
+        placeOrderBtn.disabled = true;
+      } else {
+        data.cart.forEach((item, index) => {
+          const div = document.createElement("div");
+          div.className = "cart-item";
+          div.style.animationDelay = `${index * 0.1}s`;
+          div.innerHTML = `
+                      <span>${item.name} ($${Number(item.price).toFixed(
+            2
+          )})</span>
+                      <div class="quantity-controls">
+                          <button class="decrement" data-item-id="${
+                            item.item_id
+                          }">-</button>
+                          <input type="number" value="${
+                            item.quantity
+                          }" min="0" data-item-id="${item.item_id}">
+                          <button class="increment" data-item-id="${
+                            item.item_id
+                          }">+</button>
+                      </div>
+                  `;
+          cartItemsContainer.appendChild(div);
+        });
+        placeOrderBtn.disabled = false;
+      }
+      cartTotal.textContent = `Total: $${data.total}`;
+      cartCount.textContent = data.cart_count;
+      if (data.cart_count > 0) {
+        cartCount.classList.add("pulse");
+        setTimeout(() => cartCount.classList.remove("pulse"), 500);
+      }
     }
-    cartTotal.textContent = `Total: $${data.total}`;
-    cartCount.textContent = data.cart_count;
-    if (data.cart_count > 0) {
-      cartCount.classList.add("pulse");
-      setTimeout(() => cartCount.classList.remove("pulse"), 500);
-    }
   }
 
-  // Update modal UI
-  function updateModalUI(data) {
-    modalCartItems.innerHTML = "";
-    data.cart.forEach((item) => {
-      const div = document.createElement("div");
-      div.className = "modal-cart-item";
-      div.innerHTML = `
-              <span>${item.name}</span>
-              <span>$${Number(item.price).toFixed(2)} x ${
-        item.quantity
-      } = $${Number(item.subtotal).toFixed(2)}</span>
-          `;
-      modalCartItems.appendChild(div);
-    });
-    modalCartTotal.textContent = `Total: $${data.total}`;
-  }
-
-  // Filter menu items
-  function filterMenu() {
-    const category = categoryFilter ? categoryFilter.value : "all";
-    const search = searchFilter ? searchFilter.value.toLowerCase() : "";
-    const items = menuGrid.querySelectorAll(".item-card");
-    items.forEach((item) => {
-      const itemCategory = item.getAttribute("data-category");
-      const itemName = item.getAttribute("data-name");
-      const categoryMatch = category === "all" || itemCategory === category;
-      const searchMatch = !search || itemName.includes(search);
-      item.style.display = categoryMatch && searchMatch ? "block" : "none";
-    });
-  }
-
-  // Initialize order page
+  // Order page functionality
+  const menuGrid = document.getElementById("menu-grid");
   if (menuGrid) {
+    const categoryFilter = document.getElementById("category-filter");
+    const searchFilter = document.getElementById("search-filter");
+    const cartSidebar = document.getElementById("cart-sidebar");
+    const cartToggle = document.querySelector(".cart-toggle");
+    const cartClose = document.querySelector(".cart-close");
+    const cartItemsContainer = document.getElementById("cart-items");
+    const placeOrderBtn = document.getElementById("place-order-btn");
+    const clearCartBtn = document.getElementById("clear-cart-btn");
+    const orderModal = document.getElementById("order-modal");
+    const modalCartItems = document.getElementById("modal-cart-items");
+    const modalCartTotal = document.getElementById("modal-cart-total");
+    const cancelOrderBtn = document.getElementById("cancel-order-btn");
+
+    // Update modal UI
+    function updateModalUI(data) {
+      if (modalCartItems && modalCartTotal) {
+        modalCartItems.innerHTML = "";
+        data.cart.forEach((item) => {
+          const div = document.createElement("div");
+          div.className = "modal-cart-item";
+          div.innerHTML = `
+                      <span>${item.name}</span>
+                      <span>$${Number(item.price).toFixed(2)} x ${
+            item.quantity
+          } = $${Number(item.subtotal).toFixed(2)}</span>
+                  `;
+          modalCartItems.appendChild(div);
+        });
+        modalCartTotal.textContent = `Total: $${data.total}`;
+      }
+    }
+
+    // Filter menu items
+    function filterMenu() {
+      const category = categoryFilter ? categoryFilter.value : "all";
+      const search = searchFilter ? searchFilter.value.toLowerCase() : "";
+      const items = menuGrid.querySelectorAll(".item-card");
+      items.forEach((item) => {
+        const itemCategory = item.getAttribute("data-category");
+        const itemName = item.getAttribute("data-name");
+        const categoryMatch = category === "all" || itemCategory === category;
+        const searchMatch = !search || itemName.includes(search);
+        item.style.display = categoryMatch && searchMatch ? "block" : "none";
+      });
+    }
+
+    // Cart sidebar
+    if (cartSidebar && cartToggle && cartClose) {
+      cartToggle.addEventListener("click", () => {
+        cartSidebar.classList.toggle("active");
+      });
+      cartClose.addEventListener("click", () => {
+        cartSidebar.classList.remove("active");
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && cartSidebar.classList.contains("active")) {
+          cartSidebar.classList.remove("active");
+        }
+      });
+    }
+
     // Load initial cart
     fetch("/public/cart_handler.php", {
       method: "POST",
@@ -266,27 +290,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
           })
           .catch((error) => showToast("Error: " + error, "error"));
-      }
-    });
-
-    // Cart toggle
-    if (cartToggle) {
-      cartToggle.addEventListener("click", () => {
-        cartSidebar.classList.toggle("active");
-      });
-    }
-
-    // Cart close
-    if (cartClose) {
-      cartClose.addEventListener("click", () => {
-        cartSidebar.classList.remove("active");
-      });
-    }
-
-    // Close cart on Escape key
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && cartSidebar.classList.contains("active")) {
-        cartSidebar.classList.remove("active");
       }
     });
 
@@ -393,5 +396,143 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
     }
+  }
+
+  // Reservation page functionality
+  const reservationForm = document.getElementById("reservation-form");
+  if (reservationForm) {
+    const reservationDate = document.getElementById("reservation-date");
+    const reservationTime = document.getElementById("reservation-time");
+    const partySize = document.getElementById("party-size");
+    const tableNumber = document.getElementById("table-number");
+    const specialRequests = document.getElementById("special-requests");
+    const reserveBtn = document.getElementById("reserve-btn");
+    const availabilityMessage = document.getElementById("availability-message");
+    const reservationModal = document.getElementById("reservation-modal");
+    const modalDate = document.getElementById("modal-date");
+    const modalTime = document.getElementById("modal-time");
+    const modalPartySize = document.getElementById("modal-party-size");
+    const modalTable = document.getElementById("modal-table");
+    const modalRequests = document.getElementById("modal-requests");
+    const confirmReservationForm = document.getElementById(
+      "confirm-reservation-form"
+    );
+    const cancelReservationBtn = document.getElementById(
+      "cancel-reservation-btn"
+    );
+
+    // Set date constraints
+    const today = new Date();
+    reservationDate.min = today.toISOString().split("T")[0];
+    reservationDate.max = new Date(today.setDate(today.getDate() + 30))
+      .toISOString()
+      .split("T")[0];
+
+    // Check availability
+    function checkAvailability() {
+      const date = reservationDate.value;
+      const time = reservationTime.value;
+      const party_size = partySize.value;
+
+      if (date && time && party_size) {
+        fetch("/public/availability_handler.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: `action=check_availability&date=${encodeURIComponent(
+            date
+          )}&time=${encodeURIComponent(time)}&party_size=${party_size}`,
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`HTTP error ${response.status}`);
+            }
+            return response.json();
+          })
+          .then((data) => {
+            tableNumber.innerHTML = '<option value="">Select Table</option>';
+            if (data.success) {
+              data.tables.forEach((table) => {
+                const option = document.createElement("option");
+                option.value = table.table_number;
+                option.textContent = table.label;
+                tableNumber.appendChild(option);
+              });
+              tableNumber.disabled = false;
+              availabilityMessage.textContent = data.message;
+              availabilityMessage.className = "availability-message success";
+            } else {
+              tableNumber.disabled = true;
+              availabilityMessage.textContent = data.message;
+              availabilityMessage.className = "availability-message error";
+            }
+          })
+          .catch((error) => {
+            tableNumber.disabled = true;
+            availabilityMessage.textContent = "Error checking availability.";
+            availabilityMessage.className = "availability-message error";
+            showToast("Error checking availability: " + error.message, "error");
+          });
+      } else {
+        tableNumber.innerHTML = '<option value="">Select Table</option>';
+        tableNumber.disabled = true;
+        availabilityMessage.textContent = "";
+      }
+    }
+
+    // Trigger availability check
+    reservationDate.addEventListener("change", checkAvailability);
+    reservationTime.addEventListener("change", checkAvailability);
+    partySize.addEventListener("change", checkAvailability);
+
+    // Reserve button
+    reserveBtn.addEventListener("click", () => {
+      const date = reservationDate.value;
+      const time = reservationTime.value;
+      const party_size = partySize.value;
+      const table_number = tableNumber.value;
+      const requests = specialRequests.value;
+
+      if (!date || !time || !party_size || !table_number) {
+        showToast("Please fill all required fields.", "error");
+        return;
+      }
+
+      // Populate modal
+      modalDate.textContent = date;
+      modalTime.textContent = time;
+      modalPartySize.textContent = `${party_size} ${
+        party_size == 1 ? "Person" : "People"
+      }`;
+      modalTable.textContent =
+        tableNumber.options[tableNumber.selectedIndex].text;
+      modalRequests.textContent = requests || "";
+      document.getElementById("confirm-date").value = date;
+      document.getElementById("confirm-time").value = time;
+      document.getElementById("confirm-party-size").value = party_size;
+      document.getElementById("confirm-table-number").value = table_number;
+      document.getElementById("confirm-special-requests").value = requests;
+
+      reservationModal.classList.add("active");
+    });
+
+    // Cancel reservation
+    cancelReservationBtn.addEventListener("click", () => {
+      reservationModal.classList.remove("active");
+    });
+
+    // Close modal on outside click
+    reservationModal.addEventListener("click", (e) => {
+      if (e.target === reservationModal) {
+        reservationModal.classList.remove("active");
+      }
+    });
+
+    // Reset form after submission
+    confirmReservationForm.addEventListener("submit", (e) => {
+      reservationForm.reset();
+      tableNumber.innerHTML = '<option value="">Select Table</option>';
+      tableNumber.disabled = true;
+      availabilityMessage.textContent = "";
+    });
   }
 });

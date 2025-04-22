@@ -1,89 +1,132 @@
--- CREATE TABLE customers (
---     customer_id INTEGER PRIMARY KEY AUTOINCREMENT,
---     username TEXT UNIQUE NOT NULL,
---     password TEXT NOT NULL,
---     email TEXT NOT NULL,
---     phone TEXT,
---     is_admin BOOLEAN DEFAULT 0, -- 0 for customer, 1 for admin
---     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
--- );
+-- -- -- -- CREATE TABLE customers (
+-- -- -- --     customer_id INTEGER PRIMARY KEY AUTOINCREMENT,
+-- -- -- --     username TEXT UNIQUE NOT NULL,
+-- -- -- --     password TEXT NOT NULL,
+-- -- -- --     email TEXT NOT NULL,
+-- -- -- --     phone TEXT,
+-- -- -- --     is_admin BOOLEAN DEFAULT 0, -- 0 for customer, 1 for admin
+-- -- -- --     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+-- -- -- -- );
 
--- CREATE TABLE menu_items (
---     item_id INTEGER PRIMARY KEY AUTOINCREMENT,
---     name TEXT NOT NULL,
---     description TEXT,
---     price REAL NOT NULL,
---     image_path TEXT,
---     category TEXT NOT NULL
--- );
+-- -- -- -- CREATE TABLE menu_items (
+-- -- -- --     item_id INTEGER PRIMARY KEY AUTOINCREMENT,
+-- -- -- --     name TEXT NOT NULL,
+-- -- -- --     description TEXT,
+-- -- -- --     price REAL NOT NULL,
+-- -- -- --     image_path TEXT,
+-- -- -- --     category TEXT NOT NULL
+-- -- -- -- );
 
+-- -- -- -- CREATE TABLE reservations_orders (
+-- -- -- --     order_id INTEGER PRIMARY KEY AUTOINCREMENT,
+-- -- -- --     customer_id INTEGER,
+-- -- -- --     type TEXT NOT NULL,
+-- -- -- --     item_id INTEGER,
+-- -- -- --     quantity INTEGER,
+-- -- -- --     date_time DATETIME NOT NULL,
+-- -- -- --     status TEXT NOT NULL,
+-- -- -- --     table_number INTEGER,
+-- -- -- --     FOREIGN KEY (customer_id) REFERENCES customers(customer_id),
+-- -- -- --     FOREIGN KEY (item_id) REFERENCES menu_items(item_id)
+-- -- -- -- );
+
+-- -- -- -- INSERT INTO menu_items (name, description, price, image_path, category)
+-- -- -- -- VALUES ('Margherita Pizza', 'Classic pizza with tomato and mozzarella', 12.99, 'uploads/pizza.jpg', 'Main Course');
+-- -- -- -- INSERT INTO menu_items (name, description, price, image_path, category) VALUES
+-- -- -- -- ('Bruschetta', 'Toasted ciabatta topped with fresh tomatoes, basil, garlic, and balsamic glaze.', 7.99, 'uploads/bruschetta.jpg', 'Appetizer'),
+-- -- -- -- ('Mozzarella Sticks', 'Crispy, golden-fried mozzarella served with marinara sauce.', 6.99, 'uploads/mozzarella_sticks.jpg', 'Appetizer'),
+-- -- -- -- ('Calamari Fritti', 'Lightly breaded calamari rings, fried to perfection, with lemon aioli.', 9.99, 'uploads/calamari_fritti.jpg', 'Appetizer'),
+-- -- -- -- ('Spinach Artichoke Dip', 'Creamy blend of spinach, artichokes, and cheese, served with tortilla chips.', 8.49, 'uploads/spinach_artichoke_dip.jpg', 'Appetizer'),
+-- -- -- -- ('Chicken Wings', 'Spicy buffalo wings with celery sticks and blue cheese dressing.', 10.99, 'uploads/chicken_wings.jpg', 'Appetizer'),
+-- -- -- -- ('Stuffed Mushrooms', 'Mushroom caps filled with garlic-herb cream cheese and baked.', 7.49, 'uploads/stuffed_mushrooms.jpg', 'Appetizer'),
+-- -- -- -- ('Shrimp Cocktail', 'Chilled jumbo shrimp with tangy cocktail sauce and lemon.', 11.99, 'uploads/shrimp_cocktail.jpg', 'Appetizer'),
+-- -- -- -- ('Garlic Bread', 'Warm, toasted bread with garlic butter and parsley.', 4.99, 'uploads/garlic_bread.jpg', 'Appetizer'),
+-- -- -- -- ('Caesar Salad', 'Crisp romaine, croutons, parmesan, and creamy Caesar dressing.', 8.99, 'uploads/caesar_salad.jpg', 'Salad'),
+-- -- -- -- ('Greek Salad', 'Cucumbers, tomatoes, feta, olives, red onions, and oregano vinaigrette.', 9.49, 'uploads/greek_salad.jpg', 'Salad'),
+-- -- -- -- ('Caprese Salad', 'Fresh mozzarella, tomatoes, basil, and balsamic reduction.', 8.99, 'uploads/caprese_salad.jpg', 'Salad'),
+-- -- -- -- ('Cobb Salad', 'Grilled chicken, bacon, avocado, egg, and blue cheese with ranch dressing.', 11.99, 'uploads/cobb_salad.jpg', 'Salad'),
+-- -- -- -- ('Spinach Salad', 'Babylisten Baby spinach, strawberries, walnuts, and goat cheese with balsamic vinaigrette.', 9.99, 'uploads/spinach_salad.jpg', 'Salad'),
+-- -- -- -- ('House Salad', 'Mixed greens, carrots, cucumbers, and cherry tomatoes with choice of dressing.', 6.99, 'uploads/house_salad.jpg', 'Salad'),
+-- -- -- -- ('Grilled Salmon', 'Herb-crusted salmon fillet with lemon butter sauce and roasted vegetables.', 19.99, 'uploads/grilled_salmon.jpg', 'Main Course'),
+-- -- -- -- ('Chicken Parmesan', 'Breaded chicken breast topped with marinara and mozzarella, served with spaghetti.', 16.99, 'uploads/chicken_parmesan.jpg', 'Main Course'),
+-- -- -- -- ('Beef Tenderloin', 'Grilled beef tenderloin with red wine reduction, mashed potatoes, and asparagus.', 24.99, 'uploads/beef_tenderloin.jpg', 'Main Course'),
+-- -- -- -- ('Vegetable Stir-Fry', 'Sautéed seasonal vegetables in a soy-ginger sauce, served with jasmine rice.', 13.99, 'uploads/vegetable_stir_fry.jpg', 'Main Course'),
+-- -- -- -- ('Pork Chops', 'Grilled pork chops with apple chutney and sweet potato mash.', 17.99, 'uploads/pork_chops.jpg', 'Main Course'),
+-- -- -- -- ('BBQ Ribs', 'Slow-cooked pork ribs with tangy BBQ sauce, served with coleslaw and fries.', 20.99, 'uploads/bbq_ribs.jpg', 'Main Course'),
+-- -- -- -- ('Mushroom Risotto', 'Creamy risotto with wild mushrooms, parmesan, and truffle oil.', 15.99, 'uploads/mushroom_risotto.jpg', 'Main Course'),
+-- -- -- -- ('Grilled Chicken Breast', 'Juicy chicken breast with herb marinade, served with quinoa and green beans.', 14.99, 'uploads/grilled_chicken_breast.jpg', 'Main Course'),
+-- -- -- -- ('Lamb Shank', 'Braised lamb shank with rosemary and garlic, served with polenta.', 22.99, 'uploads/lamb_shank.jpg', 'Main Course'),
+-- -- -- -- ('Seafood Paella', 'Saffron-infused rice with shrimp, mussels, clams, and chorizo.', 21.99, 'uploads/seafood_paella.jpg', 'Main Course'),
+-- -- -- -- ('Spaghetti Carbonara', 'Classic pasta with pancetta, egg, parmesan, and black pepper.', 13.99, 'uploads/spaghetti_carbonara.jpg', 'Pasta'),
+-- -- -- -- ('Fettuccine Alfredo', 'Creamy alfredo sauce with fettuccine, topped with parmesan.', 12.99, 'uploads/fettuccine_alfredo.jpg', 'Pasta'),
+-- -- -- -- ('Lasagna Bolognese', 'Layered pasta with meat ragu, béchamel, and mozzarella.', 15.99, 'uploads/lasagna_bolognese.jpg', 'Pasta'),
+-- -- -- -- ('Pesto Penne', 'Penne tossed with basil pesto, cherry tomatoes, and pine nuts.', 12.49, 'uploads/pesto_penne.jpg', 'Pasta'),
+-- -- -- -- ('Shrimp Linguine', 'Linguine with sautéed shrimp, garlic, and white wine sauce.', 17.99, 'uploads/shrimp_linguine.jpg', 'Pasta'),
+-- -- -- -- ('Mushroom Ravioli', 'Homemade ravioli filled with mushrooms, served with sage butter sauce.', 14.99, 'uploads/mushroom_ravioli.jpg', 'Pasta'),
+-- -- -- -- ('Margherita Pizza', 'Classic pizza with tomato, mozzarella, and fresh basil.', 12.99, 'uploads/margherita_pizza.jpg', 'Pizza'),
+-- -- -- -- ('Pepperoni Pizza', 'Tomato sauce, mozzarella, and spicy pepperoni.', 13.99, 'uploads/pepperoni_pizza.jpg', 'Pizza'),
+-- -- -- -- ('Veggie Pizza', 'Bell peppers, mushrooms, onions, olives, and mozzarella.', 12.49, 'uploads/veggie_pizza.jpg', 'Pizza'),
+-- -- -- -- ('BBQ Chicken Pizza', 'BBQ sauce, grilled chicken, red onions, and cilantro.', 14.99, 'uploads/bbq_chicken_pizza.jpg', 'Pizza'),
+-- -- -- -- ('Four Cheese Pizza', 'Mozzarella, parmesan, gorgonzola, and ricotta with tomato sauce.', 13.49, 'uploads/four_cheese_pizza.jpg', 'Pizza'),
+-- -- -- -- ('Hawaiian Pizza', 'Ham, pineapple, mozzarella, and tomato sauce.', 13.99, 'uploads/hawaiian_pizza.jpg', 'Pizza'),
+-- -- -- -- ('Chocolate Lava Cake', 'Warm chocolate cake with a molten center, served with vanilla ice cream.', 7.99, 'uploads/chocolate_lava_cake.jpg', 'Dessert'),
+-- -- -- -- ('Tiramisu', 'Coffee-soaked ladyfingers layered with mascarpone cream.', 6.99, 'uploads/tiramisu.jpg', 'Dessert'),
+-- -- -- -- ('Cheesecake', 'Creamy New York-style cheesecake with berry compote.', 6.49, 'uploads/cheesecake.jpg', 'Dessert'),
+-- -- -- -- ('Crème Brûlée', 'Vanilla custard with a caramelized sugar crust.', 7.49, 'uploads/creme_brulee.jpg', 'Dessert'),
+-- -- -- -- ('Apple Pie', 'Warm apple pie with a flaky crust, served with whipped cream.', 6.99, 'uploads/apple_pie.jpg', 'Dessert'),
+-- -- -- -- ('Panna Cotta', 'Silky vanilla panna cotta with raspberry coulis.', 6.49, 'uploads/panna_cotta.jpg', 'Dessert'),
+-- -- -- -- ('Fresh Lemonade', 'House-made lemonade with a hint of mint.', 3.99, 'uploads/fresh_lemonade.jpg', 'Beverage'),
+-- -- -- -- ('Iced Tea', 'Refreshing black tea with lemon and sweetener options.', 3.49, 'uploads/iced_tea.jpg', 'Beverage'),
+-- -- -- -- ('Espresso', 'Rich, single-shot espresso from premium beans.', 2.99, 'uploads/espresso.jpg', 'Beverage'),
+-- -- -- -- ('Cappuccino', 'Espresso with steamed milk and foam.', 4.49, 'uploads/cappuccino.jpg', 'Beverage'),
+-- -- -- -- ('House Red Wine', 'Glass of our signature red wine, robust and fruity.', 6.99, 'uploads/house_red_wine.jpg', 'Beverage'),
+-- -- -- -- ('Sparkling Water', 'Crisp, refreshing sparkling water with a lemon wedge.', 2.99, 'uploads/sparkling_water.jpg', 'Beverage'),
+-- -- -- -- ('French Fries', 'Crispy golden fries with sea salt.', 3.99, 'uploads/french_fries.jpg', 'Side'),
+-- -- -- -- ('Mashed Potatoes', 'Creamy mashed potatoes with garlic butter.', 4.49, 'uploads/mashed_potatoes.jpg', 'Side'),
+-- -- -- -- ('Sautéed Vegetables', 'Seasonal vegetables sautéed in olive oil and herbs.', 4.99, 'uploads/sauteed_vegetables.jpg', 'Side'),
+-- -- -- -- ('Onion Rings', 'Crispy, battered onion rings with ranch dipping sauce.', 4.99, 'uploads/onion_rings.jpg', 'Side');
+
+-- -- -- -- ALTER TABLE customers ADD COLUMN theme TEXT DEFAULT 'white';
+
+-- -- -- ALTER TABLE reservations_orders ADD COLUMN special_requests TEXT;
+
+-- -- -- Create tables table
+-- -- CREATE TABLE IF NOT EXISTS tables (
+-- --     table_id INTEGER PRIMARY KEY AUTOINCREMENT,
+-- --     table_number INTEGER NOT NULL UNIQUE,
+-- --     capacity INTEGER NOT NULL CHECK(capacity > 0),
+-- --     description TEXT
+-- -- );
+
+-- -- -- Seed initial data (matches previous hardcoded table_capacities)
+-- -- INSERT OR IGNORE INTO tables (table_number, capacity, description) VALUES
+-- -- (1, 2, 'Small window table'),
+-- -- (2, 2, 'Small corner table'),
+-- -- (3, 2, 'Small center table'),
+-- -- (4, 6, 'Medium family table'),
+-- -- (5, 6, 'Medium group table'),
+-- -- (6, 6, 'Medium patio table'),
+-- -- (7, 6, 'Medium private table'),
+-- -- (8, 10, 'Large banquet table'),
+-- -- (9, 10, 'Large event table'),
+-- -- (10, 10, 'Large communal table');
+
+-- -- Drop existing table to recreate with unique constraint and index
+-- DROP TABLE IF EXISTS reservations_orders;
+
+-- -- Recreate reservations_orders with unique constraint and foreign keys
 -- CREATE TABLE reservations_orders (
---     order_id INTEGER PRIMARY KEY AUTOINCREMENT,
---     customer_id INTEGER,
---     type TEXT NOT NULL,
---     item_id INTEGER,
---     quantity INTEGER,
+--     reservation_id INTEGER PRIMARY KEY AUTOINCREMENT,
+--     customer_id INTEGER NOT NULL,
+--     type TEXT NOT NULL CHECK(type IN ('reservation', 'order')),
 --     date_time DATETIME NOT NULL,
---     status TEXT NOT NULL,
+--     status TEXT NOT NULL CHECK(status IN ('pending', 'confirmed', 'cancelled')),
 --     table_number INTEGER,
+--     special_requests TEXT,
 --     FOREIGN KEY (customer_id) REFERENCES customers(customer_id),
---     FOREIGN KEY (item_id) REFERENCES menu_items(item_id)
+--     FOREIGN KEY (table_number) REFERENCES tables(table_number),
+--     UNIQUE(table_number, date_time)
 -- );
 
--- INSERT INTO menu_items (name, description, price, image_path, category)
--- VALUES ('Margherita Pizza', 'Classic pizza with tomato and mozzarella', 12.99, 'uploads/pizza.jpg', 'Main Course');
--- INSERT INTO menu_items (name, description, price, image_path, category) VALUES
--- ('Bruschetta', 'Toasted ciabatta topped with fresh tomatoes, basil, garlic, and balsamic glaze.', 7.99, 'uploads/bruschetta.jpg', 'Appetizer'),
--- ('Mozzarella Sticks', 'Crispy, golden-fried mozzarella served with marinara sauce.', 6.99, 'uploads/mozzarella_sticks.jpg', 'Appetizer'),
--- ('Calamari Fritti', 'Lightly breaded calamari rings, fried to perfection, with lemon aioli.', 9.99, 'uploads/calamari_fritti.jpg', 'Appetizer'),
--- ('Spinach Artichoke Dip', 'Creamy blend of spinach, artichokes, and cheese, served with tortilla chips.', 8.49, 'uploads/spinach_artichoke_dip.jpg', 'Appetizer'),
--- ('Chicken Wings', 'Spicy buffalo wings with celery sticks and blue cheese dressing.', 10.99, 'uploads/chicken_wings.jpg', 'Appetizer'),
--- ('Stuffed Mushrooms', 'Mushroom caps filled with garlic-herb cream cheese and baked.', 7.49, 'uploads/stuffed_mushrooms.jpg', 'Appetizer'),
--- ('Shrimp Cocktail', 'Chilled jumbo shrimp with tangy cocktail sauce and lemon.', 11.99, 'uploads/shrimp_cocktail.jpg', 'Appetizer'),
--- ('Garlic Bread', 'Warm, toasted bread with garlic butter and parsley.', 4.99, 'uploads/garlic_bread.jpg', 'Appetizer'),
--- ('Caesar Salad', 'Crisp romaine, croutons, parmesan, and creamy Caesar dressing.', 8.99, 'uploads/caesar_salad.jpg', 'Salad'),
--- ('Greek Salad', 'Cucumbers, tomatoes, feta, olives, red onions, and oregano vinaigrette.', 9.49, 'uploads/greek_salad.jpg', 'Salad'),
--- ('Caprese Salad', 'Fresh mozzarella, tomatoes, basil, and balsamic reduction.', 8.99, 'uploads/caprese_salad.jpg', 'Salad'),
--- ('Cobb Salad', 'Grilled chicken, bacon, avocado, egg, and blue cheese with ranch dressing.', 11.99, 'uploads/cobb_salad.jpg', 'Salad'),
--- ('Spinach Salad', 'Babylisten Baby spinach, strawberries, walnuts, and goat cheese with balsamic vinaigrette.', 9.99, 'uploads/spinach_salad.jpg', 'Salad'),
--- ('House Salad', 'Mixed greens, carrots, cucumbers, and cherry tomatoes with choice of dressing.', 6.99, 'uploads/house_salad.jpg', 'Salad'),
--- ('Grilled Salmon', 'Herb-crusted salmon fillet with lemon butter sauce and roasted vegetables.', 19.99, 'uploads/grilled_salmon.jpg', 'Main Course'),
--- ('Chicken Parmesan', 'Breaded chicken breast topped with marinara and mozzarella, served with spaghetti.', 16.99, 'uploads/chicken_parmesan.jpg', 'Main Course'),
--- ('Beef Tenderloin', 'Grilled beef tenderloin with red wine reduction, mashed potatoes, and asparagus.', 24.99, 'uploads/beef_tenderloin.jpg', 'Main Course'),
--- ('Vegetable Stir-Fry', 'Sautéed seasonal vegetables in a soy-ginger sauce, served with jasmine rice.', 13.99, 'uploads/vegetable_stir_fry.jpg', 'Main Course'),
--- ('Pork Chops', 'Grilled pork chops with apple chutney and sweet potato mash.', 17.99, 'uploads/pork_chops.jpg', 'Main Course'),
--- ('BBQ Ribs', 'Slow-cooked pork ribs with tangy BBQ sauce, served with coleslaw and fries.', 20.99, 'uploads/bbq_ribs.jpg', 'Main Course'),
--- ('Mushroom Risotto', 'Creamy risotto with wild mushrooms, parmesan, and truffle oil.', 15.99, 'uploads/mushroom_risotto.jpg', 'Main Course'),
--- ('Grilled Chicken Breast', 'Juicy chicken breast with herb marinade, served with quinoa and green beans.', 14.99, 'uploads/grilled_chicken_breast.jpg', 'Main Course'),
--- ('Lamb Shank', 'Braised lamb shank with rosemary and garlic, served with polenta.', 22.99, 'uploads/lamb_shank.jpg', 'Main Course'),
--- ('Seafood Paella', 'Saffron-infused rice with shrimp, mussels, clams, and chorizo.', 21.99, 'uploads/seafood_paella.jpg', 'Main Course'),
--- ('Spaghetti Carbonara', 'Classic pasta with pancetta, egg, parmesan, and black pepper.', 13.99, 'uploads/spaghetti_carbonara.jpg', 'Pasta'),
--- ('Fettuccine Alfredo', 'Creamy alfredo sauce with fettuccine, topped with parmesan.', 12.99, 'uploads/fettuccine_alfredo.jpg', 'Pasta'),
--- ('Lasagna Bolognese', 'Layered pasta with meat ragu, béchamel, and mozzarella.', 15.99, 'uploads/lasagna_bolognese.jpg', 'Pasta'),
--- ('Pesto Penne', 'Penne tossed with basil pesto, cherry tomatoes, and pine nuts.', 12.49, 'uploads/pesto_penne.jpg', 'Pasta'),
--- ('Shrimp Linguine', 'Linguine with sautéed shrimp, garlic, and white wine sauce.', 17.99, 'uploads/shrimp_linguine.jpg', 'Pasta'),
--- ('Mushroom Ravioli', 'Homemade ravioli filled with mushrooms, served with sage butter sauce.', 14.99, 'uploads/mushroom_ravioli.jpg', 'Pasta'),
--- ('Margherita Pizza', 'Classic pizza with tomato, mozzarella, and fresh basil.', 12.99, 'uploads/margherita_pizza.jpg', 'Pizza'),
--- ('Pepperoni Pizza', 'Tomato sauce, mozzarella, and spicy pepperoni.', 13.99, 'uploads/pepperoni_pizza.jpg', 'Pizza'),
--- ('Veggie Pizza', 'Bell peppers, mushrooms, onions, olives, and mozzarella.', 12.49, 'uploads/veggie_pizza.jpg', 'Pizza'),
--- ('BBQ Chicken Pizza', 'BBQ sauce, grilled chicken, red onions, and cilantro.', 14.99, 'uploads/bbq_chicken_pizza.jpg', 'Pizza'),
--- ('Four Cheese Pizza', 'Mozzarella, parmesan, gorgonzola, and ricotta with tomato sauce.', 13.49, 'uploads/four_cheese_pizza.jpg', 'Pizza'),
--- ('Hawaiian Pizza', 'Ham, pineapple, mozzarella, and tomato sauce.', 13.99, 'uploads/hawaiian_pizza.jpg', 'Pizza'),
--- ('Chocolate Lava Cake', 'Warm chocolate cake with a molten center, served with vanilla ice cream.', 7.99, 'uploads/chocolate_lava_cake.jpg', 'Dessert'),
--- ('Tiramisu', 'Coffee-soaked ladyfingers layered with mascarpone cream.', 6.99, 'uploads/tiramisu.jpg', 'Dessert'),
--- ('Cheesecake', 'Creamy New York-style cheesecake with berry compote.', 6.49, 'uploads/cheesecake.jpg', 'Dessert'),
--- ('Crème Brûlée', 'Vanilla custard with a caramelized sugar crust.', 7.49, 'uploads/creme_brulee.jpg', 'Dessert'),
--- ('Apple Pie', 'Warm apple pie with a flaky crust, served with whipped cream.', 6.99, 'uploads/apple_pie.jpg', 'Dessert'),
--- ('Panna Cotta', 'Silky vanilla panna cotta with raspberry coulis.', 6.49, 'uploads/panna_cotta.jpg', 'Dessert'),
--- ('Fresh Lemonade', 'House-made lemonade with a hint of mint.', 3.99, 'uploads/fresh_lemonade.jpg', 'Beverage'),
--- ('Iced Tea', 'Refreshing black tea with lemon and sweetener options.', 3.49, 'uploads/iced_tea.jpg', 'Beverage'),
--- ('Espresso', 'Rich, single-shot espresso from premium beans.', 2.99, 'uploads/espresso.jpg', 'Beverage'),
--- ('Cappuccino', 'Espresso with steamed milk and foam.', 4.49, 'uploads/cappuccino.jpg', 'Beverage'),
--- ('House Red Wine', 'Glass of our signature red wine, robust and fruity.', 6.99, 'uploads/house_red_wine.jpg', 'Beverage'),
--- ('Sparkling Water', 'Crisp, refreshing sparkling water with a lemon wedge.', 2.99, 'uploads/sparkling_water.jpg', 'Beverage'),
--- ('French Fries', 'Crispy golden fries with sea salt.', 3.99, 'uploads/french_fries.jpg', 'Side'),
--- ('Mashed Potatoes', 'Creamy mashed potatoes with garlic butter.', 4.49, 'uploads/mashed_potatoes.jpg', 'Side'),
--- ('Sautéed Vegetables', 'Seasonal vegetables sautéed in olive oil and herbs.', 4.99, 'uploads/sauteed_vegetables.jpg', 'Side'),
--- ('Onion Rings', 'Crispy, battered onion rings with ranch dipping sauce.', 4.99, 'uploads/onion_rings.jpg', 'Side');
-
-ALTER TABLE customers ADD COLUMN theme TEXT DEFAULT 'white';
+-- -- Create index for faster overlap checks
+-- CREATE INDEX idx_reservations_table_date ON reservations_orders(table_number, date_time);
