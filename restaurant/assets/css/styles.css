@@ -425,10 +425,10 @@ button {
   font-size: 1rem;
   cursor: pointer;
   transition: background-color 0.3s, transform 0.2s;
-  -webkit-transition: background-color 0.3s, transform 0.2s;
-  -moz-transition: background-color 0.3s, transform 0.2s;
-  -ms-transition: background-color 0.3s, transform 0.2s;
-  -o-transition: background-color 0.3s, transform 0.2s;
+  -webkit-transition:;
+  -moz-transition:;
+  -ms-transition:;
+  -o-transition:;
 }
 button:hover {
   background-color: #8b1a1a;
@@ -853,7 +853,7 @@ footer {
   margin: 0 auto;
   padding: 1rem;
   text-align: center;
-  background-color: #a52a2a;
+  background-color: white;
 }
 .footer-links {
   list-style: none;

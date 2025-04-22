@@ -35,20 +35,11 @@ function validateCsrfToken($token) {
 }
 
 // Secure session start
+ob_start(); // Prevent headers sent error
+
 function secureSessionStart() {
-    $sessionConfig = [
-        'cookie_lifetime' => 0,
-        'cookie_httponly' => true,
-        'cookie_secure' => isset($_SERVER['HTTPS']),
-        'cookie_samesite' => 'Strict'
-    ];
-
-    // Only start session if not already active
     if (session_status() === PHP_SESSION_NONE) {
-        session_start($sessionConfig);
-    }
-
-    if (isset($_SESSION['customer_id'])) {
+        session_start();
         session_regenerate_id(true);
     }
 }

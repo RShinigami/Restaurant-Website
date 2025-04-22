@@ -1,2 +1,0 @@
-<?php
-// Admin: Manage customers

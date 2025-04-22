@@ -24,10 +24,10 @@ secureSessionStart();
                     <li><a href="/public/reserve.php">Reserve</a></li>
                     <?php if (isLoggedIn()): ?>
                         <li><a href="/public/account.php">Account</a></li>
-                        <li><a href="/public/logout.php" class="logout-link">Logout</a></li>
                         <?php if (isAdmin()): ?>
                             <li><a href="/public/admin/dashboard.php">Admin Dashboard</a></li>
                             <li><a href="/public/tables.php">Manage Tables</a></li>
+                            <li><a href="/public/logout.php" class="logout-link">Logout</a></li>
                         <?php endif; ?>
                     <?php else: ?>
                         <li><a href="/public/login.php">Login</a></li>
