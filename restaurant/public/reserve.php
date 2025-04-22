@@ -9,7 +9,101 @@ if (!isLoggedIn()) {
     exit;
 }
 
-// Generate CSRF token
+// Initialize status for toast
+$reservation_status = ['message' => '', 'type' => ''];
+
+// Handle reservation submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_reservation'])) {
+    if (!validateCsrfToken($_POST['csrf_token'])) {
+        $reservation_status = ['message' => 'Invalid CSRF token.', 'type' => 'error'];
+    } else {
+        $date = filter_input(INPUT_POST, 'date', FILTER_SANITIZE_SPECIAL_CHARS);
+        $time = filter_input(INPUT_POST, 'time', FILTER_SANITIZE_SPECIAL_CHARS);
+        $party_size = filter_input(INPUT_POST, 'party_size', FILTER_VALIDATE_INT);
+        $table_number = filter_input(INPUT_POST, 'table_number', FILTER_VALIDATE_INT);
+        $special_requests = filter_input(INPUT_POST, 'special_requests', FILTER_SANITIZE_SPECIAL_CHARS);
+
+        // Validate inputs
+        $errors = [];
+        $date_time = DateTime::createFromFormat('Y-m-d h:i A', "$date $time");
+        if (!$date_time || $date_time < new DateTime('tomorrow')) {
+            $errors[] = 'Invalid or past date/time.';
+        }
+        if ($party_size < 1) {
+            $errors[] = 'Invalid party size.';
+        }
+
+        // Check table existence and capacity
+        $stmt = $db->prepare('SELECT capacity FROM tables WHERE table_number = ?');
+        $stmt->execute([$table_number]);
+        $table = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$table) {
+            $errors[] = 'Invalid table number.';
+        } elseif ($party_size > $table['capacity']) {
+            $errors[] = 'Party size exceeds table capacity.';
+        }
+
+        // Check for overlapping reservations
+        if (empty($errors)) {
+            $duration_hours = $party_size <= 4 ? 1 : 2;
+            $start_time = $date_time->format('Y-m-d H:i:s');
+            $end_time = (clone $date_time)->modify("+$duration_hours hours")->format('Y-m-d H:i:s');
+            $stmt = $db->prepare('
+                SELECT COUNT(*) 
+                FROM reservations_orders 
+                WHERE type = ? 
+                AND table_number = ? 
+                AND status IN (?, ?) 
+                AND (
+                    (date_time >= ? AND date_time < ?) 
+                    OR 
+                    (date_time <= ? AND datetime(date_time, \'+\' || ? || \' hours\') > ?)
+                )
+            ');
+            $stmt->execute([
+                'reservation',
+                $table_number,
+                'pending',
+                'confirmed',
+                $start_time,
+                $end_time,
+                $start_time,
+                $duration_hours,
+                $start_time
+            ]);
+            if ($stmt->fetchColumn() > 0) {
+                $errors[] = 'Table is already reserved for this time.';
+            }
+        }
+
+        if (empty($errors)) {
+            try {
+                $stmt = $db->prepare('
+                    INSERT INTO reservations_orders 
+                    (customer_id, type, date_time, status, table_number, special_requests) 
+                    VALUES (?, ?, ?, ?, ?, ?)
+                ');
+                $stmt->execute([
+                    $_SESSION['customer_id'],
+                    'reservation',
+                    $date_time->format('Y-m-d H:i:s'),
+                    'pending',
+                    $table_number,
+                    $special_requests ?: null
+                ]);
+                $reservation_status = ['message' => 'Reservation confirmed!', 'type' => 'success'];
+            } catch (PDOException $e) {
+                $errors[] = 'Failed to make reservation: ' . $e->getMessage();
+            }
+        }
+
+        if (!empty($errors)) {
+            $reservation_status = ['message' => implode(' ', $errors), 'type' => 'error'];
+        }
+    }
+}
+
+// Generate CSRF token after POST to avoid reuse
 $csrf_token = generateCsrfToken();
 
 // Operating hours and time slots
@@ -112,6 +206,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const confirmForm = document.getElementById('confirm-reservation-form');
     const cancelBtn = document.getElementById('cancel-reservation-btn');
 
+    // Show toast if reservation status exists
+    <?php if ($reservation_status['message']): ?>
+        showToast(<?php echo json_encode($reservation_status['message']); ?>, <?php echo json_encode($reservation_status['type']); ?>);
+        <?php if ($reservation_status['type'] === 'success'): ?>
+            // Reset form and redirect to account.php after toast
+            form.reset();
+            tableSelect.disabled = true;
+            tableSelect.innerHTML = '<option value="">Select Table</option>';
+            availabilityMessage.textContent = '';
+            alternativeTimes.innerHTML = '';
+            setTimeout(() => {
+                window.location.href = 'account.php';
+            }, 2000);
+        <?php endif; ?>
+    <?php endif; ?>
+
     // Check availability on input change
     const checkAvailability = () => {
         const date = dateInput.value;
@@ -170,6 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // Only trigger checkAvailability on explicit input changes
     dateInput.addEventListener('change', checkAvailability);
     timeSelect.addEventListener('change', checkAvailability);
     partySizeSelect.addEventListener('change', checkAvailability);
@@ -234,100 +345,6 @@ function showToast(message, type) {
     text-decoration: underline;
 }
 </style>
-
-<?php
-// Handle reservation submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_reservation'])) {
-    if (!validateCsrfToken($_POST['csrf_token'])) {
-        die('Invalid CSRF token.');
-    }
-
-    $date = filter_input(INPUT_POST, 'date', FILTER_SANITIZE_SPECIAL_CHARS);
-    $time = filter_input(INPUT_POST, 'time', FILTER_SANITIZE_SPECIAL_CHARS);
-    $party_size = filter_input(INPUT_POST, 'party_size', FILTER_VALIDATE_INT);
-    $table_number = filter_input(INPUT_POST, 'table_number', FILTER_VALIDATE_INT);
-    $special_requests = filter_input(INPUT_POST, 'special_requests', FILTER_SANITIZE_SPECIAL_CHARS);
-
-    // Validate inputs
-    $errors = [];
-    $date_time = DateTime::createFromFormat('Y-m-d h:i A', "$date $time");
-    if (!$date_time || $date_time < new DateTime('tomorrow')) {
-        $errors[] = 'Invalid or past date/time.';
-    }
-    if ($party_size < 1) {
-        $errors[] = 'Invalid party size.';
-    }
-
-    // Check table existence and capacity
-    $stmt = $db->prepare('SELECT capacity FROM tables WHERE table_number = ?');
-    $stmt->execute([$table_number]);
-    $table = $stmt->fetch(PDO::FETCH_ASSOC);
-    if (!$table) {
-        $errors[] = 'Invalid table number.';
-    } elseif ($party_size > $table['capacity']) {
-        $errors[] = 'Party size exceeds table capacity.';
-    }
-
-    // Check for overlapping reservations
-    if (empty($errors)) {
-        $duration_hours = $party_size <= 4 ? 1 : 2;
-        $start_time = $date_time->format('Y-m-d H:i:s');
-        $end_time = (clone $date_time)->modify("+$duration_hours hours")->format('Y-m-d H:i:s');
-        $stmt = $db->prepare('
-            SELECT COUNT(*) 
-            FROM reservations_orders 
-            WHERE type = ? 
-            AND table_number = ? 
-            AND status IN (?, ?) 
-            AND (
-                (date_time >= ? AND date_time < ?) 
-                OR 
-                (date_time <= ? AND datetime(date_time, \'+\' || ? || \' hours\') > ?)
-            )
-        ');
-        $stmt->execute([
-            'reservation',
-            $table_number,
-            'pending',
-            'confirmed',
-            $start_time,
-            $end_time,
-            $start_time,
-            $duration_hours,
-            $start_time
-        ]);
-        if ($stmt->fetchColumn() > 0) {
-            $errors[] = 'Table is already reserved for this time.';
-        }
-    }
-
-    if (empty($errors)) {
-        try {
-            $stmt = $db->prepare('
-                INSERT INTO reservations_orders 
-                (customer_id, type, date_time, status, table_number, special_requests) 
-                VALUES (?, ?, ?, ?, ?, ?)
-            ');
-            $stmt->execute([
-                $_SESSION['customer_id'],
-                'reservation',
-                $date_time->format('Y-m-d H:i:s'),
-                'pending',
-                $table_number,
-                $special_requests ?: null
-            ]);
-            echo '<script>showToast("Reservation confirmed!", "success"); setTimeout(() => location.reload(), 2000);</script>';
-        } catch (PDOException $e) {
-            $errors[] = 'Failed to make reservation: ' . $e->getMessage();
-        }
-    }
-
-    if (!empty($errors)) {
-        $error_message = implode(' ', $errors);
-        echo '<script>showToast("' . addslashes($error_message) . '", "error");</script>';
-    }
-}
-?>
 
 <?php include '../includes/footer.php'; ?>
 </main>
