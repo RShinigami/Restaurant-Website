@@ -116,7 +116,7 @@
 
 -- -- Recreate reservations_orders with unique constraint and foreign keys
 -- CREATE TABLE reservations_orders (
---     reservation_id INTEGER PRIMARY KEY AUTOINCREMENT,
+--     id INTEGER PRIMARY KEY AUTOINCREMENT,
 --     customer_id INTEGER NOT NULL,
 --     type TEXT NOT NULL CHECK(type IN ('reservation', 'order')),
 --     date_time DATETIME NOT NULL,
