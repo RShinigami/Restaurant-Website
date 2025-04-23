@@ -53,6 +53,18 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // Show toast notification
+  function showToast(message, type) {
+    const toast = document.getElementById("toast");
+    if (toast) {
+      toast.textContent = message;
+      toast.className = `toast ${type} active`;
+      setTimeout(() => {
+        toast.className = "toast";
+      }, 3000);
+    }
+  }
+
   // Register form validation
   const registerForm = document.getElementById("registerForm");
   if (registerForm) {
@@ -130,18 +142,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Show toast notification
-  function showToast(message, type) {
-    const toast = document.getElementById("toast");
-    if (toast) {
-      toast.textContent = message;
-      toast.className = `toast ${type} active`;
-      setTimeout(() => {
-        toast.className = "toast";
-      }, 3000);
-    }
-  }
-
   // Update cart UI (for order page)
   function updateCartUI(data) {
     const cartItemsContainer = document.getElementById("cart-items");
@@ -159,21 +159,19 @@ document.addEventListener("DOMContentLoaded", () => {
           div.className = "cart-item";
           div.style.animationDelay = `${index * 0.1}s`;
           div.innerHTML = `
-                      <span>${item.name} ($${Number(item.price).toFixed(
-            2
-          )})</span>
-                      <div class="quantity-controls">
-                          <button class="decrement" data-item-id="${
-                            item.item_id
-                          }">-</button>
-                          <input type="number" value="${
-                            item.quantity
-                          }" min="0" data-item-id="${item.item_id}">
-                          <button class="increment" data-item-id="${
-                            item.item_id
-                          }">+</button>
-                      </div>
-                  `;
+            <span>${item.name} ($${Number(item.price).toFixed(2)})</span>
+            <div class="quantity-controls">
+                <button class="decrement" data-item-id="${
+                  item.item_id
+                }">-</button>
+                <input type="number" value="${
+                  item.quantity
+                }" min="0" data-item-id="${item.item_id}">
+                <button class="increment" data-item-id="${
+                  item.item_id
+                }">+</button>
+            </div>
+          `;
           cartItemsContainer.appendChild(div);
         });
         placeOrderBtn.disabled = false;
@@ -211,11 +209,11 @@ document.addEventListener("DOMContentLoaded", () => {
           const div = document.createElement("div");
           div.className = "modal-cart-item";
           div.innerHTML = `
-                      <span>${item.name}</span>
-                      <span>$${Number(item.price).toFixed(2)} x ${
+            <span>${item.name}</span>
+            <span>$${Number(item.price).toFixed(2)} x ${
             item.quantity
           } = $${Number(item.subtotal).toFixed(2)}</span>
-                  `;
+          `;
           modalCartItems.appendChild(div);
         });
         modalCartTotal.textContent = `Total: $${data.total}`;
@@ -582,6 +580,116 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Account page functionality
+  // Profile form validation and submission
+  const profileForm = document.getElementById("profile-form");
+  if (profileForm) {
+    profileForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const username = document.getElementById("username").value;
+      const email = document.getElementById("email").value;
+      const phone = document.getElementById("phone").value;
+      const currentPassword = document.getElementById("current_password").value;
+      const newPassword = document.getElementById("new_password").value;
+      const confirmPassword = document.getElementById("confirm_password").value;
+
+      let errors = [];
+
+      if (username.length < 3 || username.length > 50) {
+        errors.push("Username must be 3-50 characters.");
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        errors.push("Invalid email address.");
+      }
+      if (!/^\+?\d{7,15}$/.test(phone)) {
+        errors.push("Invalid phone number (7-15 digits).");
+      }
+      if (
+        (email !== profileForm.dataset.originalEmail || newPassword) &&
+        !currentPassword
+      ) {
+        errors.push(
+          "Current password is required to change email or password."
+        );
+      }
+      if (newPassword) {
+        if (
+          !/[A-Za-z].*[0-9]|[0-9].*[A-Za-z]/.test(newPassword) ||
+          newPassword.length < 8
+        ) {
+          errors.push(
+            "New password must be 8+ characters with letters and numbers."
+          );
+        }
+        if (newPassword !== confirmPassword) {
+          errors.push("New passwords do not match.");
+        }
+      }
+
+      const errorContainer = document.createElement("ul");
+      errorContainer.className = "errors";
+      if (errors.length > 0) {
+        errors.forEach((error) => {
+          const li = document.createElement("li");
+          li.textContent = error;
+          errorContainer.appendChild(li);
+        });
+        const existingErrors = profileForm.querySelector(".errors");
+        if (existingErrors) existingErrors.remove();
+        profileForm.prepend(errorContainer);
+        return;
+      }
+
+      // Clear errors
+      const existingErrors = profileForm.querySelector(".errors");
+      if (existingErrors) existingErrors.remove();
+
+      // Submit via AJAX
+      const formData = new FormData(profileForm);
+      formData.append("action", "update_profile");
+
+      fetch("account.php", {
+        method: "POST",
+        body: formData,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          showToast(data.message, data.success ? "success" : "error");
+          if (data.success) {
+            profileForm.dataset.originalEmail = email;
+            document.getElementById("current_password").value = "";
+            document.getElementById("new_password").value = "";
+            document.getElementById("confirm_password").value = "";
+            setTimeout(() => {
+              window.location.reload();
+            }, 2000);
+          }
+        })
+        .catch((error) => {
+          showToast("Error updating profile: " + error, "error");
+          console.error("Fetch error:", error);
+        });
+    });
+  }
+
+  // Tab switching
+  const tabButtons = document.querySelectorAll(".tab-btn");
+  const tabPanes = document.querySelectorAll(".tab-pane");
+  if (tabButtons && tabPanes) {
+    tabButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        // Remove active classes
+        tabButtons.forEach((btn) => btn.classList.remove("active"));
+        tabPanes.forEach((pane) => pane.classList.remove("active"));
+
+        // Add active classes
+        button.classList.add("active");
+        const tabId = button.dataset.tab;
+        document.getElementById(tabId).classList.add("active");
+      });
+    });
+  }
+
+  // Cancellation buttons
   const cancelButtons = document.querySelectorAll(".cancel-btn");
   if (cancelButtons) {
     cancelButtons.forEach((button) => {

@@ -38,7 +38,6 @@ nav .logo {
   cursor: pointer;
   padding: 0.5rem;
 }
-
 .nav-toggle:hover {
   background-color: #a52a2a;
   border-radius: 4px;
@@ -382,7 +381,8 @@ nav ul li a:hover {
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
-.form-container h1 {
+.form-container h1,
+.form-container h2 {
   text-align: center;
   margin-bottom: 1.5rem;
   color: #a52a2a;
@@ -427,31 +427,20 @@ button {
   font-size: 1rem;
   cursor: pointer;
   transition: background-color 0.3s, transform 0.2s;
-  -webkit-transition: ;
-  -moz-transition: ;
-  -ms-transition: ;
-  -o-transition: ;
 }
 button:hover {
   background-color: #8b1a1a;
   transform: scale(1.05);
-  -webkit-transform: scale(1.05);
-  -moz-transform: scale(1.05);
-  -ms-transform: scale(1.05);
-  -o-transform: scale(1.05);
 }
 button:active {
   transform: scale(0.95);
 }
-
 .login-btn {
   width: 25%;
 }
-
 .register-btn {
   width: 30%;
 }
-
 .form-container p {
   text-align: center;
   margin-top: 1rem;
@@ -687,7 +676,6 @@ button:active {
 .cart-close:hover {
   background-color: #a52a2a;
 }
-
 .cart-content {
   padding: 3rem 2rem 2rem;
   height: 100%;
@@ -715,10 +703,6 @@ button:active {
   opacity: 0;
   transform: translateY(10px);
   animation: slideIn 0.3s forwards;
-  -webkit-transform: translateY(10px);
-  -moz-transform: translateY(10px);
-  -ms-transform: translateY(10px);
-  -o-transform: translateY(10px);
 }
 @keyframes slideIn {
   to {
@@ -832,24 +816,57 @@ button:active {
 
 /* Account Page Styles */
 .account-page {
-  max-width: 800px;
+  max-width: 1200px;
   margin: 2rem auto;
   padding: 0 1rem;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  border-bottom: 2px solid #ccc;
+  margin-bottom: 2rem;
+}
+.tab-btn {
+  flex: 1;
+  padding: 1rem;
+  background: #f4f4f4;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #333;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.tab-btn:hover {
+  background: #e0e0e0;
+}
+.tab-btn.active {
+  background: #a52a2a;
+  color: #fff;
+  border-bottom: 2px solid #ffd700;
+}
+.tab-content {
+  margin-top: 1rem;
+}
+.tab-pane {
+  display: none;
+}
+.tab-pane.active {
+  display: block;
 }
 
 .reservations-container,
 .orders-container {
   width: 100%;
-  max-width: 800px;
+  max-width: 1200px;
   margin: 2rem auto;
 }
-
 .reservations-container h2,
 .orders-container h2 {
   color: #a52a2a;
   margin-bottom: 1rem;
 }
-
 .reservations-table,
 .orders-table {
   width: 100%;
@@ -857,7 +874,6 @@ button:active {
   margin-top: 1rem;
   table-layout: fixed;
 }
-
 .reservations-table th,
 .reservations-table td,
 .orders-table th,
@@ -871,39 +887,32 @@ button:active {
   max-width: 200px;
   font-size: 16px;
 }
-
 .reservations-table th,
 .orders-table th {
   background-color: #a52a2a;
   color: #fff;
   font-weight: bold;
 }
-
 .reservations-table td,
 .orders-table td {
   background-color: #fff;
 }
-
 .reservations-table tr:nth-child(even) td,
 .orders-table tr:nth-child(even) td {
   background-color: #f9f9f9;
 }
-
 .reservations-table tr:hover td,
 .orders-table tr:hover td {
   background-color: #f1f1f1;
 }
-
 .orders-table ul {
   list-style: none;
   padding: 0;
   margin: 0;
 }
-
 .orders-table ul li {
   margin: 0.3rem 0;
 }
-
 .cancel-btn {
   background-color: #a52a2a;
   width: auto;
@@ -914,30 +923,8 @@ button:active {
   transition: background-color 0.3s;
   font-size: 16px;
 }
-
 .cancel-btn:hover {
   background-color: #8b0000;
-}
-
-@media (max-width: 768px) {
-  .reservations-table,
-  .orders-table {
-    font-size: 14px;
-  }
-
-  .reservations-table th,
-  .reservations-table td,
-  .orders-table th,
-  .orders-table td {
-    padding: 0.8rem;
-    min-width: 60px;
-    max-width: 120px;
-  }
-
-  .cancel-btn {
-    padding: 0.5rem 1rem;
-    font-size: 14px;
-  }
 }
 
 /* Toast Notification */
@@ -995,7 +982,6 @@ footer {
     flex: 0 0 50%;
   }
 }
-
 @media (max-width: 768px) {
   nav {
     flex-wrap: wrap;
@@ -1141,5 +1127,28 @@ footer {
   #clear-cart-btn {
     height: 50px;
     font-size: 1.1rem;
+  }
+  .tabs {
+    flex-direction: column;
+  }
+  .tab-btn {
+    padding: 0.8rem;
+    font-size: 1rem;
+  }
+  .reservations-table,
+  .orders-table {
+    font-size: 14px;
+  }
+  .reservations-table th,
+  .reservations-table td,
+  .orders-table th,
+  .orders-table td {
+    padding: 0.8rem;
+    min-width: 60px;
+    max-width: 120px;
+  }
+  .cancel-btn {
+    padding: 0.5rem 1rem;
+    font-size: 14px;
   }
 }

@@ -23,7 +23,7 @@ secureSessionStart();
                     <li><a href="/public/order.php">Order</a></li>
                     <li><a href="/public/reserve.php">Reserve</a></li>
                     <?php if (isLoggedIn() and !isAdmin()): ?>
-                        <li><a href="#full-menu">Menu</a></li>
+                        <li><a href="/public/index.php#full-menu">Menu</a></li>
                         <li><a href="/public/account.php">Account</a></li>
                         <?php if (isAdmin()): ?>
                             <li><a href="/public/admin/dashboard.php">Admin Dashboard</a></li>
