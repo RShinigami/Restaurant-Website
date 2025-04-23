@@ -56,8 +56,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     if (empty($errors)) {
         try {
             $duration_hours = $party_size <= 4 ? 1 : 2;
-            $start_time = $date_time->format('Y-m-d H:i:s');
-            $end_time = (clone $date_time)->modify("+$duration_hours hours")->format('Y-m-d H:i:s');
+            $start_time = $date_time->format('Y-m-d H:i');
+            $end_time = (clone $date_time)->modify("+$duration_hours hours")->format('Y-m-d H:i');
             $stmt = $db->prepare('
                 SELECT COUNT(*) 
                 FROM reservations_orders 
@@ -101,7 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $success = $stmt->execute([
                 $_SESSION['customer_id'],
                 'reservation',
-                $date_time->format('Y-m-d H:i:s'),
+                $date_time->format('Y-m-d H:i'),
                 'pending',
                 $table_number,
                 $special_requests ?: null

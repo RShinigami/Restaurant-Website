@@ -867,8 +867,8 @@ button:active {
   text-align: left;
   vertical-align: top;
   overflow-wrap: break-word;
-  min-width: 80px;
-  max-width: 150px;
+  min-width: 100px;
+  max-width: 200px;
   font-size: 16px;
 }
 
