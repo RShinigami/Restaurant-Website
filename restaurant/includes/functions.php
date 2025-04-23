@@ -1,10 +1,11 @@
 <?php
 // Shared PHP functions
-
 // Sanitize input
 function sanitize($input) {
     return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
 }
+
+
 
 // Validate email
 function isValidEmail($email) {

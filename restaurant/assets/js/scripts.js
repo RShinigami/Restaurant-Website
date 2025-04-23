@@ -580,4 +580,45 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
   }
+
+  // Account page functionality
+  const cancelButtons = document.querySelectorAll(".cancel-btn");
+  if (cancelButtons) {
+    cancelButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const id = button.dataset.id;
+        const csrfToken = button.dataset.csrf;
+        const isReservation = button.classList.contains(
+          "cancel-reservation-btn"
+        );
+        const type = isReservation ? "reservation" : "order";
+        const action = isReservation ? "cancel_reservation" : "cancel_order";
+
+        if (confirm(`Are you sure you want to cancel this ${type}?`)) {
+          const formData = new FormData();
+          formData.append("action", action);
+          formData.append("id", id);
+          formData.append("csrf_token", csrfToken);
+
+          fetch("account.php", {
+            method: "POST",
+            body: formData,
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              showToast(data.message, data.success ? "success" : "error");
+              if (data.success) {
+                setTimeout(() => {
+                  window.location.reload();
+                }, 2000);
+              }
+            })
+            .catch((error) => {
+              showToast(`Error cancelling ${type}.`, "error");
+              console.error("Fetch error:", error);
+            });
+        }
+      });
+    });
+  }
 });

@@ -3,6 +3,8 @@ require_once '../../config/db.php';
 require_once '../../includes/functions.php';
 secureSessionStart();
 
+clearDB($db);
+
 // Restrict to admins
 if (!isset($_SESSION['customer_id']) || !$_SESSION['is_admin']) {
     header('Location: ../public/login.php');

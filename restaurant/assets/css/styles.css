@@ -249,6 +249,7 @@ nav ul li a:hover {
   gap: 1.5rem;
 }
 .item-card {
+  max-width: 420px;
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -609,9 +610,9 @@ button:active {
 /* Cart Sidebar (for order page only) */
 .cart-sidebar {
   position: fixed;
-  top: 0;
+  top: 70px;
   right: 0;
-  height: 100vh;
+  height: 95vh;
   width: 350px;
   background: linear-gradient(180deg, #a52a2a, #8b1a1a);
   box-shadow: -4px 0 12px rgba(0, 0, 0, 0.2);
@@ -829,6 +830,116 @@ button:active {
   margin-top: 1rem;
 }
 
+/* Account Page Styles */
+.account-page {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.reservations-container,
+.orders-container {
+  width: 100%;
+  max-width: 800px;
+  margin: 2rem auto;
+}
+
+.reservations-container h2,
+.orders-container h2 {
+  color: #a52a2a;
+  margin-bottom: 1rem;
+}
+
+.reservations-table,
+.orders-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  table-layout: fixed;
+}
+
+.reservations-table th,
+.reservations-table td,
+.orders-table th,
+.orders-table td {
+  padding: 1rem;
+  border: 2px solid #ccc;
+  text-align: left;
+  vertical-align: top;
+  overflow-wrap: break-word;
+  min-width: 80px;
+  max-width: 150px;
+  font-size: 16px;
+}
+
+.reservations-table th,
+.orders-table th {
+  background-color: #a52a2a;
+  color: #fff;
+  font-weight: bold;
+}
+
+.reservations-table td,
+.orders-table td {
+  background-color: #fff;
+}
+
+.reservations-table tr:nth-child(even) td,
+.orders-table tr:nth-child(even) td {
+  background-color: #f9f9f9;
+}
+
+.reservations-table tr:hover td,
+.orders-table tr:hover td {
+  background-color: #f1f1f1;
+}
+
+.orders-table ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.orders-table ul li {
+  margin: 0.3rem 0;
+}
+
+.cancel-btn {
+  background-color: #a52a2a;
+  width: auto;
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-size: 16px;
+}
+
+.cancel-btn:hover {
+  background-color: #8b0000;
+}
+
+@media (max-width: 768px) {
+  .reservations-table,
+  .orders-table {
+    font-size: 14px;
+  }
+
+  .reservations-table th,
+  .reservations-table td,
+  .orders-table th,
+  .orders-table td {
+    padding: 0.8rem;
+    min-width: 60px;
+    max-width: 120px;
+  }
+
+  .cancel-btn {
+    padding: 0.5rem 1rem;
+    font-size: 14px;
+  }
+}
+
 /* Toast Notification */
 .toast {
   position: fixed;
@@ -858,6 +969,7 @@ button:active {
 /* Footer */
 footer {
   margin: 0 auto;
+  bottom: 0;
   padding: 1rem;
   text-align: center;
   background-color: #f9f9f9;

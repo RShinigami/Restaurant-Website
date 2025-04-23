@@ -18,14 +18,6 @@ $error_message = '';
 $success_message = isset($_SESSION['success_message']) ? $_SESSION['success_message'] : '';
 unset($_SESSION['success_message']); // Clear after use
 
-// Auto-delete cancelled reservations
-try {
-    $stmt = $db->prepare('DELETE FROM reservations_orders WHERE type = ? AND status = ?');
-    $stmt->execute(['reservation', 'cancelled']);
-} catch (Exception $e) {
-    $error_message = 'Failed to delete cancelled reservations: ' . $e->getMessage();
-}
-
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!isset($_POST['csrf_token']) || !validateCsrfToken($_POST['csrf_token'])) {
