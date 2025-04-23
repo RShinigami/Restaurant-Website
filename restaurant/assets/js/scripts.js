@@ -547,7 +547,7 @@ document.addEventListener("DOMContentLoaded", () => {
               availabilityMessage.textContent = "";
               // Redirect to account.php after toast
               setTimeout(() => {
-                window.location.href = "account.php";
+                window.location.href = "account.php#reservations";
               }, 2000);
             }
           })
@@ -671,22 +671,39 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Tab switching
+  // Tab switching and hash management
   const tabButtons = document.querySelectorAll(".tab-btn");
   const tabPanes = document.querySelectorAll(".tab-pane");
   if (tabButtons && tabPanes) {
+    // Function to activate a tab
+    function activateTab(tabId) {
+      tabButtons.forEach((btn) => btn.classList.remove("active"));
+      tabPanes.forEach((pane) => pane.classList.remove("active"));
+
+      const button = document.querySelector(`.tab-btn[data-tab="${tabId}"]`);
+      const pane = document.getElementById(tabId);
+      if (button && pane) {
+        button.classList.add("active");
+        pane.classList.add("active");
+      }
+    }
+
+    // Handle tab clicks and update hash
     tabButtons.forEach((button) => {
       button.addEventListener("click", () => {
-        // Remove active classes
-        tabButtons.forEach((btn) => btn.classList.remove("active"));
-        tabPanes.forEach((pane) => pane.classList.remove("active"));
-
-        // Add active classes
-        button.classList.add("active");
         const tabId = button.dataset.tab;
-        document.getElementById(tabId).classList.add("active");
+        activateTab(tabId);
+        window.location.hash = tabId;
       });
     });
+
+    // On page load, check hash and activate tab
+    const hash = window.location.hash.replace("#", "");
+    if (hash && ["account-details", "reservations", "orders"].includes(hash)) {
+      activateTab(hash);
+    } else {
+      activateTab("account-details"); // Default tab
+    }
   }
 
   // Cancellation buttons
@@ -701,6 +718,7 @@ document.addEventListener("DOMContentLoaded", () => {
         );
         const type = isReservation ? "reservation" : "order";
         const action = isReservation ? "cancel_reservation" : "cancel_order";
+        const currentTab = isReservation ? "reservations" : "orders";
 
         if (confirm(`Are you sure you want to cancel this ${type}?`)) {
           const formData = new FormData();
@@ -717,7 +735,7 @@ document.addEventListener("DOMContentLoaded", () => {
               showToast(data.message, data.success ? "success" : "error");
               if (data.success) {
                 setTimeout(() => {
-                  window.location.reload();
+                  window.location.href = `account.php#${currentTab}`;
                 }, 2000);
               }
             })

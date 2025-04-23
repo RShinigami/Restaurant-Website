@@ -13,7 +13,6 @@ if (!isLoggedIn()) {
 $categories = [];
 $stmt = $db->query('SELECT DISTINCT category FROM menu_items ORDER BY category');
 $categories = $stmt->fetchAll(PDO::FETCH_COLUMN);
-
 $menu_items = [];
 foreach ($categories as $category) {
     $stmt = $db->prepare('SELECT item_id, name, description, price, image_path, category FROM menu_items WHERE category = ? ORDER BY name');

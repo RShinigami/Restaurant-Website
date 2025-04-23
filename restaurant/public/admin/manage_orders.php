@@ -1,6 +1,6 @@
 <?php
-require_once '../config/db.php';
-require_once '../includes/functions.php';
+require_once '../../config/db.php';
+require_once '../../includes/functions.php';
 secureSessionStart();
 
 // Restrict to admins
@@ -165,7 +165,7 @@ $csrf_token = generateCsrfToken();
     </style>
 </head>
 <body>
-    <?php include '../includes/header.php'; ?>
+    <?php include '../../includes/header.php'; ?>
 
     <section class="admin-dashboard">
         <div class="sidebar" id="sidebar">
@@ -180,7 +180,7 @@ $csrf_token = generateCsrfToken();
                 <a href="manage_menu_items.php">Manage Menu Items</a>
                 <a href="manage_reservations.php">Manage Reservations</a>
                 <a href="manage_orders.php" class="active">Manage Orders</a>
-                <a href="../public/logout.php">Logout</a>
+                <a href="../logout.php">Logout</a>
             </nav>
         </div>
         <div class="dashboard-content">
@@ -189,7 +189,7 @@ $csrf_token = generateCsrfToken();
         </div>
     </section>
 
-    <?php include '../includes/footer.php'; ?>
+    <?php include '../../includes/footer.php'; ?>
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
