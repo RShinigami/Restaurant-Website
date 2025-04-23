@@ -17,7 +17,6 @@ header {
   z-index: 1000;
 }
 nav {
-  max-width: 1200px;
   margin: 0 auto;
   padding: 1rem;
   display: flex;
@@ -38,6 +37,11 @@ nav .logo {
   font-size: 1.5rem;
   cursor: pointer;
   padding: 0.5rem;
+}
+
+.nav-toggle:hover {
+  background-color: #a52a2a;
+  border-radius: 4px;
 }
 .nav-menu {
   display: flex;
@@ -66,7 +70,6 @@ nav ul li a:hover {
   padding: 3rem 1rem;
   background-color: #fff;
   margin: 2rem auto;
-  max-width: 1200px;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
@@ -126,7 +129,6 @@ nav ul li a:hover {
 
 /* Menu Preview Section */
 .menu-preview {
-  max-width: 1200px;
   margin: 2rem auto;
   padding: 1rem;
 }
@@ -185,7 +187,7 @@ nav ul li a:hover {
   animation: slide-right-30s 30s linear infinite;
 }
 .slider-item {
-  flex: 0 0 33.33%;
+  flex: 0 0 25%;
   padding: 0 0.5rem;
   box-sizing: border-box;
 }
@@ -336,7 +338,6 @@ nav ul li a:hover {
 
 /* Dashboard Section */
 .dashboard {
-  max-width: 1200px;
   margin: 2rem auto;
   padding: 1rem;
 }
@@ -425,10 +426,10 @@ button {
   font-size: 1rem;
   cursor: pointer;
   transition: background-color 0.3s, transform 0.2s;
-  -webkit-transition:;
-  -moz-transition:;
-  -ms-transition:;
-  -o-transition:;
+  -webkit-transition: ;
+  -moz-transition: ;
+  -ms-transition: ;
+  -o-transition: ;
 }
 button:hover {
   background-color: #8b1a1a;
@@ -441,6 +442,15 @@ button:hover {
 button:active {
   transform: scale(0.95);
 }
+
+.login-btn {
+  width: 25%;
+}
+
+.register-btn {
+  width: 30%;
+}
+
 .form-container p {
   text-align: center;
   margin-top: 1rem;
@@ -510,7 +520,6 @@ button:active {
 
 /* Order Page */
 .order-page {
-  max-width: 1200px;
   margin: 2rem auto;
   padding: 1rem;
 }
@@ -549,7 +558,6 @@ button:active {
 
 /* Reserve Page */
 .reserve-page {
-  max-width: 1200px;
   margin: 2rem auto;
   padding: 1rem;
 }
@@ -849,11 +857,10 @@ button:active {
 
 /* Footer */
 footer {
-  max-width: 1200px;
   margin: 0 auto;
   padding: 1rem;
   text-align: center;
-  background-color: white;
+  background-color: #f9f9f9;
 }
 .footer-links {
   list-style: none;
@@ -918,7 +925,7 @@ footer {
     padding: 0.5rem;
   }
   .btn {
-    width: 100%;
+    width: auto;
     padding: 1rem;
     text-align: center;
   }

@@ -16,6 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
     if (!validateCsrfToken($_POST['csrf_token'])) {
         $response['message'] = 'Invalid CSRF token.';
+        error_log('CSRF validation failed: ' . print_r($_POST, true));
         echo json_encode($response);
         exit;
     }
@@ -32,53 +33,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     if (!$date_time || $date_time < new DateTime('tomorrow')) {
         $errors[] = 'Invalid or past date/time.';
     }
-    if ($party_size < 1) {
+    if ($party_size === false || $party_size < 1) {
         $errors[] = 'Invalid party size.';
     }
 
     // Check table existence and capacity
-    $stmt = $db->prepare('SELECT capacity FROM tables WHERE table_number = ?');
-    $stmt->execute([$table_number]);
-    $table = $stmt->fetch(PDO::FETCH_ASSOC);
-    if (!$table) {
-        $errors[] = 'Invalid table number.';
-    } elseif ($party_size > $table['capacity']) {
-        $errors[] = 'Party size exceeds table capacity.';
+    try {
+        $stmt = $db->prepare('SELECT capacity FROM tables WHERE table_number = ?');
+        $stmt->execute([$table_number]);
+        $table = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$table) {
+            $errors[] = 'Invalid table number.';
+        } elseif ($party_size > $table['capacity']) {
+            $errors[] = 'Party size exceeds table capacity.';
+        }
+    } catch (PDOException $e) {
+        $errors[] = 'Database error checking table: ' . $e->getMessage();
+        error_log('Table query error: ' . $e->getMessage());
     }
 
     // Check for overlapping reservations
     if (empty($errors)) {
-        $duration_hours = $party_size <= 4 ? 1 : 2;
-        $start_time = $date_time->format('Y-m-d H:i:s');
-        $end_time = (clone $date_time)->modify("+$duration_hours hours")->format('Y-m-d H:i:s');
-        $stmt = $db->prepare('
-            SELECT COUNT(*) 
-            FROM reservations_orders 
-            WHERE type = ? 
-            AND table_number = ? 
-            AND status IN (?, ?) 
-            AND (
-                (date_time >= ? AND date_time < ?) 
-                OR 
-                (date_time <= ? AND datetime(date_time, \'+\' || ? || \' hours\') > ?)
-            )
-        ');
-        $stmt->execute([
-            'reservation',
-            $table_number,
-            'pending',
-            'confirmed',
-            $start_time,
-            $end_time,
-            $start_time,
-            $duration_hours,
-            $start_time
-        ]);
-        if ($stmt->fetchColumn() > 0) {
-            $errors[] = 'Table is already reserved for this time.';
+        try {
+            $duration_hours = $party_size <= 4 ? 1 : 2;
+            $start_time = $date_time->format('Y-m-d H:i:s');
+            $end_time = (clone $date_time)->modify("+$duration_hours hours")->format('Y-m-d H:i:s');
+            $stmt = $db->prepare('
+                SELECT COUNT(*) 
+                FROM reservations_orders 
+                WHERE type = ? 
+                AND table_number = ? 
+                AND status IN (?, ?) 
+                AND (
+                    (date_time >= ? AND date_time < ?) 
+                    OR 
+                    (date_time <= ? AND datetime(date_time, \'+\' || ? || \' hours\') > ?)
+                )
+            ');
+            $stmt->execute([
+                'reservation',
+                $table_number,
+                'pending',
+                'confirmed',
+                $start_time,
+                $end_time,
+                $start_time,
+                $duration_hours,
+                $start_time
+            ]);
+            if ($stmt->fetchColumn() > 0) {
+                $errors[] = 'Table is already reserved for this time.';
+            }
+        } catch (PDOException $e) {
+            $errors[] = 'Database error checking availability: ' . $e->getMessage();
+            error_log('Availability query error: ' . $e->getMessage());
         }
     }
 
+    // Insert reservation
     if (empty($errors)) {
         try {
             $stmt = $db->prepare('
@@ -86,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 (customer_id, type, date_time, status, table_number, special_requests) 
                 VALUES (?, ?, ?, ?, ?, ?)
             ');
-            $stmt->execute([
+            $success = $stmt->execute([
                 $_SESSION['customer_id'],
                 'reservation',
                 $date_time->format('Y-m-d H:i:s'),
@@ -94,14 +106,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 $table_number,
                 $special_requests ?: null
             ]);
-            $response['success'] = true;
-            $response['message'] = 'Reservation confirmed! Redirecting to your account...';
+            if ($success) {
+                $response['success'] = true;
+                $response['message'] = 'Reservation confirmed! Redirecting to your account...';
+            } else {
+                $response['message'] = 'Failed to insert reservation.';
+                error_log('Insert failed without exception.');
+            }
         } catch (PDOException $e) {
-            $errors[] = 'Failed to make reservation: ' . $e->getMessage();
+            if ($e->getCode() == '23000') { // SQLite constraint violation
+                $response['message'] = 'Table is already reserved at this time.';
+            } else {
+                $response['message'] = 'Database error: ' . $e->getMessage();
+            }
+            error_log('Insert error: ' . $e->getMessage() . ' | Data: ' . print_r($_POST, true));
         }
-    }
-
-    if (!empty($errors)) {
+    } else {
         $response['message'] = implode(' ', $errors);
     }
 
@@ -123,6 +143,7 @@ for ($time = $start_time; $time <= $end_time; $time += 30 * 60) {
 
 <?php include '../includes/header.php'; ?>
 
+<main>
 <section class="reserve-page">
     <h1>Reserve a Table</h1>
 
@@ -191,185 +212,8 @@ for ($time = $start_time; $time <= $end_time; $time += 30 * 60) {
     <!-- Toast Notification -->
     <div class="toast" id="toast"></div>
 </section>
-
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('reservation-form');
-    const dateInput = document.getElementById('reservation-date');
-    const timeSelect = document.getElementById('reservation-time');
-    const partySizeSelect = document.getElementById('party-size');
-    const tableSelect = document.getElementById('table-number');
-    const availabilityMessage = document.getElementById('availability-message');
-    const alternativeTimes = document.getElementById('alternative-times');
-    const reserveBtn = document.getElementById('reserve-btn');
-    const modal = document.getElementById('reservation-modal');
-    const confirmBtn = document.getElementById('confirm-reservation-btn');
-    const cancelBtn = document.getElementById('cancel-reservation-btn');
-
-    // Check availability on input change
-    const checkAvailability = () => {
-        const date = dateInput.value;
-        const time = timeSelect.value;
-        const partySize = partySizeSelect.value;
-
-        if (date && time && partySize) {
-            fetch('/public/availability_handler.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `action=check_availability&date=${encodeURIComponent(date)}&time=${encodeURIComponent(time)}&party_size=${encodeURIComponent(partySize)}`
-            })
-            .then(response => response.json())
-            .then(data => {
-                tableSelect.innerHTML = '<option value="">Select Table</option>';
-                tableSelect.disabled = true;
-                availabilityMessage.textContent = data.message;
-                alternativeTimes.innerHTML = '';
-
-                if (data.success && data.tables && data.tables.length > 0) {
-                    data.tables.forEach(table => {
-                        const option = document.createElement('option');
-                        option.value = table.table_number;
-                        option.textContent = table.label;
-                        tableSelect.appendChild(option);
-                    });
-                    tableSelect.disabled = false;
-                    availabilityMessage.classList.add('success');
-                    availabilityMessage.classList.remove('error');
-                } else {
-                    availabilityMessage.classList.add('error');
-                    availabilityMessage.classList.remove('success');
-                    if (data.alternatives && data.alternatives.length > 0) {
-                        const altList = document.createElement('ul');
-                        altList.innerHTML = '<strong>Try these times:</strong>';
-                        data.alternatives.forEach(alt => {
-                            const li = document.createElement('li');
-                            li.textContent = `${alt.time} (${alt.tables} table${alt.tables > 1 ? 's' : ''} available)`;
-                            li.style.cursor = 'pointer';
-                            li.addEventListener('click', () => {
-                                timeSelect.value = alt.time;
-                                checkAvailability();
-                            });
-                            altList.appendChild(li);
-                        });
-                        alternativeTimes.appendChild(altList);
-                    }
-                }
-            })
-            .catch(error => {
-                availabilityMessage.textContent = 'Error checking availability. Please try again.';
-                availabilityMessage.classList.add('error');
-                console.error('Fetch error:', error);
-                showToast('Failed to check availability.', 'error');
-            });
-        }
-    };
-
-    // Only trigger checkAvailability on explicit input changes
-    dateInput.addEventListener('change', checkAvailability);
-    timeSelect.addEventListener('change', checkAvailability);
-    partySizeSelect.addEventListener('change', checkAvailability);
-
-    // Handle reserve button click
-    reserveBtn.addEventListener('click', () => {
-        if (!form.checkValidity()) {
-            showToast('Please fill all required fields.', 'error');
-            return;
-        }
-        if (tableSelect.value === '') {
-            showToast('Please select an available table.', 'error');
-            return;
-        }
-
-        document.getElementById('modal-date').textContent = dateInput.value;
-        document.getElementById('modal-time').textContent = timeSelect.value;
-        document.getElementById('modal-party-size').textContent = partySizeSelect.value;
-        document.getElementById('modal-table').textContent = tableSelect.options[tableSelect.selectedIndex].text;
-        document.getElementById('modal-requests').textContent = document.getElementById('special-requests').value || 'None';
-
-        modal.classList.add('active');
-    });
-
-    // Handle confirm reservation via AJAX
-    confirmBtn.addEventListener('click', () => {
-        const formData = new FormData();
-        formData.append('action', 'submit_reservation');
-        formData.append('csrf_token', <?php echo json_encode(sanitize($csrf_token)); ?>);
-        formData.append('date', dateInput.value);
-        formData.append('time', timeSelect.value);
-        formData.append('party_size', partySizeSelect.value);
-        formData.append('table_number', tableSelect.value);
-        formData.append('special_requests', document.getElementById('special-requests').value);
-
-        fetch('/public/reserve.php', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            showToast(data.message, data.success ? 'success' : 'error');
-            modal.classList.remove('active');
-            if (data.success) {
-                // Reset form and UI
-                form.reset();
-                tableSelect.disabled = true;
-                tableSelect.innerHTML = '<option value="">Select Table</option>';
-                availabilityMessage.textContent = '';
-                alternativeTimes.innerHTML = '';
-                // Redirect to account.php after toast
-                setTimeout(() => {
-                    window.location.href = 'account.php';
-                }, 2000);
-            }
-        })
-        .catch(error => {
-            showToast('Error submitting reservation.', 'error');
-            modal.classList.remove('active');
-            console.error('Fetch error:', error);
-        });
-    });
-
-    // Handle modal interactions
-    cancelBtn.addEventListener('click', () => modal.classList.remove('active'));
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) modal.classList.remove('active');
-    });
-});
-
-// Toast notification
-function showToast(message, type) {
-    const toast = document.getElementById('toast');
-    toast.textContent = message;
-    toast.className = `toast ${type} active`;
-    setTimeout(() => { toast.className = 'toast'; }, 3000);
-}
-</script>
-
-<style>
-.alternative-times {
-    margin-top: 0.5rem;
-    color: #333;
-}
-.alternative-times ul {
-    list-style: none;
-    padding: 0;
-}
-.alternative-times li {
-    margin: 0.3rem 0;
-    color: #a52a2a;
-    cursor: pointer;
-}
-.alternative-times li:hover {
-    text-decoration: underline;
-}
-.modal-buttons {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-    margin-top: 1rem;
-}
-</style>
+</main>
 
 <?php include '../includes/footer.php'; ?>
-</main>
 </body>
 </html>

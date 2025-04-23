@@ -126,7 +126,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (forgotPasswordLink) {
     forgotPasswordLink.addEventListener("click", (e) => {
       e.preventDefault();
-      alert("Password reset functionality is not implemented yet.");
+      alert("one day xD");
     });
   }
 
@@ -414,12 +414,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const modalPartySize = document.getElementById("modal-party-size");
     const modalTable = document.getElementById("modal-table");
     const modalRequests = document.getElementById("modal-requests");
-    const confirmReservationForm = document.getElementById(
-      "confirm-reservation-form"
+    const confirmReservationBtn = document.getElementById(
+      "confirm-reservation-btn"
     );
     const cancelReservationBtn = document.getElementById(
       "cancel-reservation-btn"
     );
+    const csrfToken = document.querySelector('input[name="csrf_token"]').value;
 
     // Set date constraints
     const today = new Date();
@@ -435,7 +436,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const party_size = partySize.value;
 
       if (date && time && party_size) {
-        fetch("/public/availability_handler.php", {
+        fetch("availability_handler.php", {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
           body: `action=check_availability&date=${encodeURIComponent(
@@ -443,12 +444,12 @@ document.addEventListener("DOMContentLoaded", () => {
           )}&time=${encodeURIComponent(time)}&party_size=${party_size}`,
         })
           .then((response) => {
-            if (!response.ok) {
-              throw new Error(`HTTP error ${response.status}`);
-            }
+            console.log("Availability response status:", response.status);
+            if (!response.ok) throw new Error(`HTTP error ${response.status}`);
             return response.json();
           })
           .then((data) => {
+            console.log("Availability data:", data);
             tableNumber.innerHTML = '<option value="">Select Table</option>';
             if (data.success) {
               data.tables.forEach((table) => {
@@ -505,34 +506,78 @@ document.addEventListener("DOMContentLoaded", () => {
       }`;
       modalTable.textContent =
         tableNumber.options[tableNumber.selectedIndex].text;
-      modalRequests.textContent = requests || "";
-      document.getElementById("confirm-date").value = date;
-      document.getElementById("confirm-time").value = time;
-      document.getElementById("confirm-party-size").value = party_size;
-      document.getElementById("confirm-table-number").value = table_number;
-      document.getElementById("confirm-special-requests").value = requests;
+      modalRequests.textContent = requests || "None";
 
       reservationModal.classList.add("active");
     });
 
+    // Confirm reservation
+    if (confirmReservationBtn) {
+      confirmReservationBtn.addEventListener("click", () => {
+        const formData = new FormData();
+        formData.append("action", "submit_reservation");
+        formData.append("csrf_token", csrfToken);
+        formData.append("date", reservationDate.value);
+        formData.append("time", reservationTime.value);
+        formData.append("party_size", partySize.value);
+        formData.append("table_number", tableNumber.value);
+        formData.append("special_requests", specialRequests.value);
+
+        console.log("Submitting reservation:", Object.fromEntries(formData));
+
+        fetch("reserve.php", {
+          method: "POST",
+          body: formData,
+        })
+          .then((response) => {
+            console.log("Reservation response status:", response.status);
+            if (!response.ok)
+              throw new Error(
+                "Network response was not ok: " + response.statusText
+              );
+            return response.json();
+          })
+          .then((data) => {
+            console.log("Reservation response:", data);
+            showToast(data.message, data.success ? "success" : "error");
+            reservationModal.classList.remove("active");
+            if (data.success) {
+              // Reset form and UI
+              reservationForm.reset();
+              tableNumber.innerHTML = '<option value="">Select Table</option>';
+              tableNumber.disabled = true;
+              availabilityMessage.textContent = "";
+              // Redirect to account.php after toast
+              setTimeout(() => {
+                window.location.href = "account.php";
+              }, 2000);
+            }
+          })
+          .catch((error) => {
+            console.error("Reservation fetch error:", error);
+            showToast(
+              "Error submitting reservation: " + error.message,
+              "error"
+            );
+            reservationModal.classList.remove("active");
+          });
+      });
+    }
+
     // Cancel reservation
-    cancelReservationBtn.addEventListener("click", () => {
-      reservationModal.classList.remove("active");
-    });
+    if (cancelReservationBtn) {
+      cancelReservationBtn.addEventListener("click", () => {
+        reservationModal.classList.remove("active");
+      });
+    }
 
     // Close modal on outside click
-    reservationModal.addEventListener("click", (e) => {
-      if (e.target === reservationModal) {
-        reservationModal.classList.remove("active");
-      }
-    });
-
-    // Reset form after submission
-    confirmReservationForm.addEventListener("submit", (e) => {
-      reservationForm.reset();
-      tableNumber.innerHTML = '<option value="">Select Table</option>';
-      tableNumber.disabled = true;
-      availabilityMessage.textContent = "";
-    });
+    if (reservationModal) {
+      reservationModal.addEventListener("click", (e) => {
+        if (e.target === reservationModal) {
+          reservationModal.classList.remove("active");
+        }
+      });
+    }
   }
 });

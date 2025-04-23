@@ -22,13 +22,15 @@ secureSessionStart();
                 <ul>
                     <li><a href="/public/order.php">Order</a></li>
                     <li><a href="/public/reserve.php">Reserve</a></li>
-                    <?php if (isLoggedIn()): ?>
+                    <?php if (isLoggedIn() and !isAdmin()): ?>
+                        <li><a href="#full-menu">Menu</a></li>
                         <li><a href="/public/account.php">Account</a></li>
                         <?php if (isAdmin()): ?>
                             <li><a href="/public/admin/dashboard.php">Admin Dashboard</a></li>
                             <li><a href="/public/tables.php">Manage Tables</a></li>
-                            <li><a href="/public/logout.php" class="logout-link">Logout</a></li>
+                            
                         <?php endif; ?>
+                        <li><a href="/public/logout.php" class="logout-link">Logout</a></li>
                     <?php else: ?>
                         <li><a href="/public/login.php">Login</a></li>
                         <li><a href="/public/register.php">Register</a></li>

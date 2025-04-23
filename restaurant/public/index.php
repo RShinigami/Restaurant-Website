@@ -140,7 +140,7 @@ $logo_path = '../assets/images/logo.png';
 </section>
 
 <?php if (isLoggedIn()): ?>
-    <section class="full-menu">
+    <section class="full-menu" id="full-menu">
         <h2>Our Full Menu</h2>
         <?php foreach ($full_menu as $category => $items): ?>
             <?php if (!empty($items)): ?>
