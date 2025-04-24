@@ -277,9 +277,9 @@ unset($order);
                         </thead>
                         <tbody>
                             <?php foreach ($reservations as $reservation): ?>
-                                <tr>
-                                    <td><?php echo sanitize(date('Y-m-d h:i A', strtotime($reservation['date_time']))); ?></td>
-                                    <td>
+                                <tr data-id="<?php echo $reservation['id']; ?>">
+                                    <td data-label="Date & Time"><?php echo sanitize(date('Y-m-d h:i A', strtotime($reservation['date_time']))); ?></td>
+                                    <td data-label="Table">
                                         <?php
                                         $table_label = $reservation['table_number'] ? 'Table ' . $reservation['table_number'] : 'N/A';
                                         if ($reservation['description']) {
@@ -288,9 +288,9 @@ unset($order);
                                         echo $table_label;
                                         ?>
                                     </td>
-                                    <td><?php echo sanitize(ucfirst($reservation['status'])); ?></td>
-                                    <td><?php echo $reservation['special_requests'] ? sanitize($reservation['special_requests']) : 'None'; ?></td>
-                                    <td>
+                                    <td data-label="Status"><?php echo sanitize(ucfirst($reservation['status'])); ?></td>
+                                    <td data-label="Special Requests"><?php echo $reservation['special_requests'] ? sanitize($reservation['special_requests']) : 'None'; ?></td>
+                                    <td data-label="Actions">
                                         <?php if ($reservation['status'] === 'pending'): ?>
                                             <button class="btn cancel-btn cancel-reservation-btn" 
                                                     data-id="<?php echo $reservation['id']; ?>" 
@@ -327,10 +327,10 @@ unset($order);
                         </thead>
                         <tbody>
                             <?php foreach ($orders as $order): ?>
-                                <tr>
-                                    <td><?php echo sanitize($order['id']); ?></td>
-                                    <td><?php echo sanitize(date('Y-m-d h:i A', strtotime($order['date_time']))); ?></td>
-                                    <td>
+                                <tr data-id="<?php echo $order['id']; ?>">
+                                    <td data-label="Order ID"><?php echo sanitize($order['id']); ?></td>
+                                    <td data-label="Date"><?php echo sanitize(date('Y-m-d h:i A', strtotime($order['date_time']))); ?></td>
+                                    <td data-label="Items">
                                         <?php
                                         $items = $order_items[$order['id']] ?? [];
                                         if (empty($items)) {
@@ -344,9 +344,9 @@ unset($order);
                                         }
                                         ?>
                                     </td>
-                                    <td>$<?php echo number_format($order['total'] ?? 0.0, 2); ?></td>
-                                    <td><?php echo sanitize(ucfirst($order['status'])); ?></td>
-                                    <td>
+                                    <td data-label="Total">$<?php echo number_format($order['total'] ?? 0.0, 2); ?></td>
+                                    <td data-label="Status"><?php echo sanitize(ucfirst($order['status'])); ?></td>
+                                    <td data-label="Actions">
                                         <?php if ($order['status'] === 'pending'): ?>
                                             <button class="btn cancel-btn cancel-order-btn" 
                                                     data-id="<?php echo $order['id']; ?>" 
@@ -364,10 +364,391 @@ unset($order);
         </div>
     </div>
 
+    <!-- Cancel Reservation Modal -->
+    <div class="modal" id="cancel-reservation-modal">
+        <div class="modal-content">
+            <h2>Cancel Reservation</h2>
+            <p>Are you sure you want to cancel this reservation?</p>
+            <div class="modal-buttons">
+                <button class="btn" id="confirm-reservation-cancel-btn" data-id="" data-csrf="<?php echo sanitize($csrf_token); ?>">Confirm</button>
+                <button class="btn" id="cancel-reservation-cancel-btn" type="button">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cancel Order Modal -->
+    <div class="modal" id="cancel-order-modal">
+        <div class="modal-content">
+            <h2>Cancel Order</h2>
+            <p>Are you sure you want to cancel this order?</p>
+            <div class="modal-buttons">
+                <button class="btn" id="confirm-order-cancel-btn" data-id="" data-csrf="<?php echo sanitize($csrf_token); ?>">Confirm</button>
+                <button class="btn" id="cancel-order-cancel-btn" type="button">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Notification -->
     <div class="toast" id="toast"></div>
 </section>
 </main>
+
+<style>
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal.active {
+        display: flex;
+    }
+
+    .modal-content {
+        background: #fff;
+        padding: clamp(0.8rem, 1.5vw, 1.2rem);
+        border-radius: 6px;
+        box-shadow: 0 5px 14px rgba(0, 0, 0, 0.15);
+        max-width: min(400px, 92vw);
+        width: 92%;
+    }
+
+    .modal-content h2 {
+        color: #a52a2a;
+        font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+        margin-bottom: 0.8rem;
+    }
+
+    .modal-content p {
+        font-size: clamp(0.9rem, 2vw, 1.1rem);
+        color: #333;
+        margin-bottom: 0.8rem;
+    }
+
+    .modal-buttons {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+    }
+
+    .modal-content .btn {
+        margin-top: 0.4rem;
+        padding: clamp(0.5rem, 1.2vw, 0.8rem) clamp(0.8rem, 1.8vw, 1.2rem);
+        font-size: clamp(0.9rem, 2vw, 1.1rem);
+        background-color: #a52a2a;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+    }
+
+    .modal-content .btn:hover {
+        background-color: #7a1717;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    }
+
+    .toast {
+        position: fixed;
+        bottom: clamp(8px, 1.5vw, 12px);
+        right: clamp(8px, 1.5vw, 12px);
+        padding: clamp(0.4rem, 1vw, 0.6rem) clamp(0.8rem, 1.5vw, 1rem);
+        border-radius: 4px;
+        color: #fff;
+        font-size: clamp(0.85rem, 1.8vw, 1rem);
+        opacity: 0;
+        transition: opacity 0.3s;
+        z-index: 1100;
+    }
+
+    .toast.success {
+        background: #28a745;
+    }
+
+    .toast.error {
+        background: #dc3545;
+    }
+
+    .toast.active {
+        opacity: 1;
+    }
+
+    @media (max-width: 768px) {
+        .modal-content {
+            padding: clamp(0.6rem, 1.2vw, 1rem);
+            max-width: min(380px, 94vw);
+        }
+
+        .modal-content h2 {
+            font-size: clamp(1.1rem, 2.2vw, 1.4rem);
+        }
+
+        .modal-content p {
+            font-size: clamp(0.85rem, 1.8vw, 1rem);
+        }
+
+        .modal-content .btn {
+            padding: clamp(0.4rem, 1vw, 0.6rem) clamp(0.6rem, 1.5vw, 1rem);
+            font-size: clamp(0.85rem, 1.8vw, 1rem);
+        }
+
+        .toast {
+            padding: clamp(0.3rem, 0.8vw, 0.5rem) clamp(0.6rem, 1.2vw, 0.8rem);
+            font-size: clamp(0.8rem, 1.6vw, 0.95rem);
+        }
+    }
+
+    @media (max-width: 600px) {
+        .modal-content {
+            padding: clamp(0.5rem, 1vw, 0.8rem);
+            max-width: 95vw;
+        }
+
+        .modal-content h2 {
+            font-size: clamp(1rem, 2vw, 1.3rem);
+        }
+
+        .modal-content p {
+            font-size: clamp(0.8rem, 1.6vw, 0.95rem);
+        }
+
+        .modal-content .btn {
+            padding: clamp(0.3rem, 0.8vw, 0.5rem) clamp(0.5rem, 1.2vw, 0.8rem);
+            font-size: clamp(0.8rem, 1.6vw, 0.95rem);
+        }
+
+        .toast {
+            padding: clamp(0.3rem, 0.8vw, 0.5rem) clamp(0.6rem, 1.2vw, 0.8rem);
+            font-size: clamp(0.75rem, 1.4vw, 0.9rem);
+            bottom: clamp(5px, 1vw, 8px);
+            right: clamp(5px, 1vw, 8px);
+        }
+
+        /* Stacked table layout */
+        .reservations-table,
+        .orders-table {
+            display: block;
+            font-size: clamp(0.8rem, 1.6vw, 0.95rem);
+        }
+
+        .reservations-table thead,
+        .orders-table thead {
+            display: none;
+        }
+
+        .reservations-table tbody,
+        .reservations-table tr,
+        .orders-table tbody,
+        .orders-table tr {
+            display: block;
+        }
+
+        .reservations-table tr,
+        .orders-table tr {
+            margin-bottom: 0.8rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            background: #fafafa;
+        }
+
+        .reservations-table td,
+        .orders-table td {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: clamp(0.3rem, 0.8vw, 0.5rem);
+            border: none;
+            border-bottom: 1px solid #e0e0e0;
+            text-align: right;
+        }
+
+        .reservations-table td:last-child,
+        .orders-table td:last-child {
+            border-bottom: none;
+        }
+
+        .reservations-table td::before,
+        .orders-table td::before {
+            content: attr(data-label);
+            font-weight: 600;
+            color: #a52a2a;
+            text-align: left;
+            flex: 1;
+            white-space: nowrap;
+            margin-right: 0.5rem;
+        }
+
+        .reservations-table td ul,
+        .orders-table td ul {
+            padding-left: 0;
+            list-style: none;
+            text-align: left;
+            flex: 2;
+        }
+
+        .reservations-table td ul li,
+        .orders-table td ul li {
+            font-size: clamp(0.8rem, 1.6vw, 0.95rem);
+        }
+    }
+</style>
+
+<script>
+// Toast notification
+function showToast(message, type) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = `toast ${type} active`;
+    setTimeout(() => {
+        toast.className = 'toast';
+        toast.textContent = '';
+    }, 3000);
+}
+
+// Modal and cancellation handlers
+document.addEventListener('DOMContentLoaded', () => {
+    const cancelReservationModal = document.getElementById('cancel-reservation-modal');
+    const cancelOrderModal = document.getElementById('cancel-order-modal');
+    const confirmReservationCancelBtn = document.getElementById('confirm-reservation-cancel-btn');
+    const cancelReservationCancelBtn = document.getElementById('cancel-reservation-cancel-btn');
+    const confirmOrderCancelBtn = document.getElementById('confirm-order-cancel-btn');
+    const cancelOrderCancelBtn = document.getElementById('cancel-order-cancel-btn');
+
+    // Cancel reservation modal
+    document.querySelectorAll('.cancel-reservation-btn').forEach(button => {
+        // Remove existing listeners to prevent duplicates
+        button.removeEventListener('click', handleReservationClick);
+        button.addEventListener('click', handleReservationClick);
+    });
+
+    function handleReservationClick(event) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        const id = this.getAttribute('data-id');
+        confirmReservationCancelBtn.setAttribute('data-id', id);
+        cancelReservationModal.classList.add('active');
+    }
+
+    if (confirmReservationCancelBtn) {
+        confirmReservationCancelBtn.addEventListener('click', () => {
+            const id = confirmReservationCancelBtn.getAttribute('data-id');
+            const csrf = confirmReservationCancelBtn.getAttribute('data-csrf');
+            const formData = new FormData();
+            formData.append('action', 'cancel_reservation');
+            formData.append('id', id);
+            formData.append('csrf_token', csrf);
+
+            fetch('/public/account.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                showToast(data.message, data.success ? 'success' : 'error');
+                if (data.success) {
+                    cancelReservationModal.classList.remove('active');
+                    const row = document.querySelector(`.reservations-table tr[data-id="${id}"]`);
+                    if (row) {
+                        const statusCell = row.querySelector('td[data-label="Status"]') || row.cells[2];
+                        const actionCell = row.querySelector('td[data-label="Actions"]') || row.cells[4];
+                        statusCell.textContent = 'Cancelled';
+                        actionCell.innerHTML = '<span>-</span>';
+                    }
+                }
+            })
+            .catch(error => {
+                showToast('Error cancelling reservation: ' + error, 'error');
+                console.error('Fetch error:', error);
+            });
+        });
+    }
+
+    if (cancelReservationCancelBtn) {
+        cancelReservationCancelBtn.addEventListener('click', () => {
+            cancelReservationModal.classList.remove('active');
+            confirmReservationCancelBtn.setAttribute('data-id', '');
+        });
+    }
+
+    cancelReservationModal.addEventListener('click', (e) => {
+        if (e.target === cancelReservationModal) {
+            cancelReservationModal.classList.remove('active');
+            confirmReservationCancelBtn.setAttribute('data-id', '');
+        }
+    });
+
+    // Cancel order modal
+    document.querySelectorAll('.cancel-order-btn').forEach(button => {
+        // Remove existing listeners to prevent duplicates
+        button.removeEventListener('click', handleOrderClick);
+        button.addEventListener('click', handleOrderClick);
+    });
+
+    function handleOrderClick(event) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        const id = this.getAttribute('data-id');
+        confirmOrderCancelBtn.setAttribute('data-id', id);
+        cancelOrderModal.classList.add('active');
+    }
+
+    if (confirmOrderCancelBtn) {
+        confirmOrderCancelBtn.addEventListener('click', () => {
+            const id = confirmOrderCancelBtn.getAttribute('data-id');
+            const csrf = confirmOrderCancelBtn.getAttribute('data-csrf');
+            const formData = new FormData();
+            formData.append('action', 'cancel_order');
+            formData.append('id', id);
+            formData.append('csrf_token', csrf);
+
+            fetch('/public/account.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                showToast(data.message, data.success ? 'success' : 'error');
+                if (data.success) {
+                    cancelOrderModal.classList.remove('active');
+                    const row = document.querySelector(`.orders-table tr[data-id="${id}"]`);
+                    if (row) {
+                        const statusCell = row.querySelector('td[data-label="Status"]') || row.cells[4];
+                        const actionCell = row.querySelector('td[data-label="Actions"]') || row.cells[5];
+                        statusCell.textContent = 'Cancelled';
+                        actionCell.innerHTML = '<span>-</span>';
+                    }
+                }
+            })
+            .catch(error => {
+                showToast('Error cancelling order: ' + error, 'error');
+                console.error('Fetch error:', error);
+            });
+        });
+    }
+
+    if (cancelOrderCancelBtn) {
+        cancelOrderCancelBtn.addEventListener('click', () => {
+            cancelOrderModal.classList.remove('active');
+            confirmOrderCancelBtn.setAttribute('data-id', '');
+        });
+    }
+
+    cancelOrderModal.addEventListener('click', (e) => {
+        if (e.target === cancelOrderModal) {
+            cancelOrderModal.classList.remove('active');
+            confirmOrderCancelBtn.setAttribute('data-id', '');
+        }
+    });
+});
+</script>
 
 <?php include '../includes/footer.php'; ?>
 </body>

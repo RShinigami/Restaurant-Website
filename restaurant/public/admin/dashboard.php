@@ -31,56 +31,55 @@ $active_page = 'dashboard.php';
     <link rel="stylesheet" href="../../assets/css/styles.css">
     <link rel="stylesheet" href="../../assets/css/reset.css">
     <style>
-        /* Page-specific styles */
-
         .admin-container {
             display: flex;
             background-color: #f9f9f9;
-            min-height: 80vh; /* Allow natural height with minimum */
+            min-height: 80vh;
+            transition: padding-top 0.3s ease;
         }
 
         .dashboard-content {
             flex: 1;
-            max-width: 1200px;
-            margin: 3rem auto;
-            margin-left: 270px; /* Sidebar width (250px) + gap */
-            padding: 2rem;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease, margin 0.3s ease;
+            max-width: min(1200px, 94vw);
+            margin: clamp(1rem, 2vw, 1.5rem) auto;
+            margin-left: calc(250px + 1.5rem); /* Sidebar (250px) + gap */
+            padding: clamp(1rem, 2vw, 1.5rem);
+            background: #fff;
+            border-radius: 6px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease, margin 0.3s ease, padding 0.3s ease;
         }
 
         .dashboard-content:hover {
-            transform: translateY(-5px);
+            transform: translateY(-2px);
         }
 
         .dashboard-content h1 {
             color: #a52a2a;
-            font-size: 2rem;
-            margin-bottom: 1.5rem;
+            font-size: clamp(1.6rem, 3.5vw, 2rem);
+            margin-bottom: 1.2rem;
             text-align: center;
             font-weight: 600;
         }
 
         .admin-info {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            margin-bottom: 2rem;
+            background: #fff;
+            padding: clamp(0.8rem, 1.5vw, 1.2rem);
+            border-radius: 5px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+            margin-bottom: 1.5rem;
         }
 
         .admin-info h2 {
             color: #a52a2a;
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
+            font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+            margin-bottom: 0.8rem;
             text-align: center;
             font-weight: 500;
         }
 
         .admin-info p {
-            font-size: 1.1rem;
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
             color: #333;
             margin: 0.5rem 0;
             display: flex;
@@ -89,90 +88,100 @@ $active_page = 'dashboard.php';
 
         .admin-info p i {
             color: #a52a2a;
-            margin-right: 0.75rem;
-            font-size: 1.2rem;
+            margin-right: 0.6rem;
+            font-size: clamp(1rem, 2.2vw, 1.2rem);
         }
 
         .statistics-placeholder {
             text-align: center;
-            padding: 1.5rem;
+            padding: clamp(0.8rem, 1.5vw, 1.2rem);
             background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
         }
 
         .statistics-placeholder h2 {
             color: #a52a2a;
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
+            font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+            margin-bottom: 0.8rem;
         }
 
         .statistics-placeholder p {
             color: #555;
-            font-size: 1.1rem;
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
         }
 
+        /* Sidebar width adjustment */
         @media (max-width: 768px) {
             .dashboard-content {
-                margin-left: 220px; /* Sidebar width (200px) + gap */
-                max-width: 90%;
-                padding: 1.5rem;
+                margin-left: calc(200px + 1rem); /* Sidebar (200px) + gap */
+                max-width: 95vw;
+                padding: clamp(0.8rem, 1.5vw, 1.2rem);
             }
 
             .dashboard-content h1 {
-                font-size: 1.8rem;
+                font-size: clamp(1.5rem, 3.2vw, 1.9rem);
             }
 
             .admin-info h2,
             .statistics-placeholder h2 {
-                font-size: 1.3rem;
+                font-size: clamp(1.1rem, 2.2vw, 1.4rem);
             }
 
             .admin-info p,
             .statistics-placeholder p {
-                font-size: 1rem;
+                font-size: clamp(0.85rem, 1.8vw, 1rem);
+            }
+
+            .admin-info p i {
+                font-size: clamp(0.9rem, 2vw, 1.1rem);
             }
         }
 
+        /* Navbar transition */
         @media (max-width: 600px) {
             .admin-container {
                 flex-direction: column;
-                padding-top: 60px; /* Space for fixed header */
+                padding-top: 60px; /* Space for navbar */
             }
 
             .dashboard-content {
                 margin-left: 0;
-                margin: 1rem;
-                max-width: 95%;
-                padding: 1rem;
+                margin: clamp(0.8rem, 1.8vw, 1rem);
+                max-width: 96vw;
+                padding: clamp(0.6rem, 1.2vw, 1rem);
             }
 
             .dashboard-content h1 {
-                font-size: 1.6rem;
+                font-size: clamp(1.4rem, 3vw, 1.8rem);
             }
 
             .admin-info {
-                padding: 1rem;
+                padding: clamp(0.6rem, 1.2vw, 1rem);
             }
 
             .admin-info h2 {
-                font-size: 1.2rem;
+                font-size: clamp(1rem, 2vw, 1.3rem);
             }
 
             .admin-info p {
-                font-size: 0.9rem;
+                font-size: clamp(0.8rem, 1.6vw, 0.95rem);
+            }
+
+            .admin-info p i {
+                font-size: clamp(0.8rem, 1.6vw, 1rem);
             }
 
             .statistics-placeholder {
-                padding: 1rem;
+                padding: clamp(0.6rem, 1.2vw, 1rem);
             }
 
             .statistics-placeholder h2 {
-                font-size: 1.2rem;
+                font-size: clamp(1rem, 2vw, 1.3rem);
             }
 
             .statistics-placeholder p {
-                font-size: 0.9rem;
+                font-size: clamp(0.8rem, 1.6vw, 0.95rem);
             }
         }
     </style>

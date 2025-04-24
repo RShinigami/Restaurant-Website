@@ -164,142 +164,159 @@ $menu_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <link rel="stylesheet" href="../../assets/css/styles.css">
     <link rel="stylesheet" href="../../assets/css/reset.css">
     <style>
-
         .admin-container-menu {
-            width: 100%;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: none;
-            min-height: 100vh;
             background-color: #f9f9f9;
+            min-height: 80vh;
+            transition: padding-top 0.3s ease;
         }
 
         .dashboard-content {
             flex: 1;
-            max-width: 1500px;
-            margin: 3rem auto;
-            margin-left: 18%;
-            padding: 2.5rem;
-            background: linear-gradient(145deg, #ffffff 0%, #f0f0f0 100%);
-            border-radius: 10px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-            transition: transform 0.3s ease;
+            max-width: min(1200px, 94vw);
+            margin: clamp(1rem, 2vw, 1.5rem) auto;
+            margin-left: calc(250px + 1.5rem); /* Sidebar (250px) + gap */
+            padding: clamp(1rem, 2vw, 1.5rem);
+            background: #fff;
+            border-radius: 6px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease, margin 0.3s ease, padding 0.3s ease;
         }
 
         .dashboard-content:hover {
-            transform: translateY(-5px);
+            transform: translateY(-2px);
         }
 
         .dashboard-content h1 {
             color: #a52a2a;
-            font-size: 2rem;
-            margin-bottom: 1.5rem;
+            font-size: clamp(1.6rem, 3.5vw, 2rem);
+            margin-bottom: 1.2rem;
             text-align: center;
             font-weight: 600;
         }
 
-        .form-container h2, .modal-content h2, .table-container h2 {
+        .table-container h2,
+        .form-container h2,
+        .modal-content h2 {
             color: #a52a2a;
-            font-size: 1.5rem;
-            margin: 1.5rem 0 1rem;
+            font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+            margin: 1.2rem 0 0.8rem;
             font-weight: 500;
         }
 
         .form-container {
             background: #fff;
-            padding: 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            margin-bottom: 2rem;
-            width: 100%;
+            padding: clamp(0.8rem, 1.5vw, 1.2rem);
+            border-radius: 5px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+            margin-bottom: 1.5rem;
         }
 
         .form-group {
-            margin-bottom: 1rem;
+            margin-bottom: 0.8rem;
         }
 
         .form-group label {
             display: block;
             color: #333;
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            margin-bottom: 0.4rem;
         }
 
-        .form-group input, .form-group select, .form-group textarea {
-            width: 94%;
-            padding: 0.8rem;
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: clamp(0.5rem, 1.2vw, 0.8rem);
             border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 1rem;
-            transition: border-color 0.3s;
+            border-radius: 4px;
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            transition: border-color 0.3s, box-shadow 0.3s;
         }
 
         .form-group input[type="file"] {
-            padding: 0.4rem;
+            padding: clamp(0.3rem, 0.8vw, 0.5rem);
         }
 
         .form-group textarea {
             resize: vertical;
-            min-height: 100px;
+            min-height: 80px;
         }
 
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
             border-color: #a52a2a;
+            box-shadow: 0 0 4px rgba(165, 42, 42, 0.2);
             outline: none;
+        }
+
+        .form-group p {
+            margin-top: 0.4rem;
+            font-size: clamp(0.85rem, 1.8vw, 1rem);
+            color: #555;
         }
 
         .btn {
             background-color: #a52a2a;
             color: #fff;
-            padding: 0.8rem 1.5rem;
+            padding: clamp(0.5rem, 1.2vw, 0.8rem) clamp(0.8rem, 1.8vw, 1.2rem);
             border: none;
-            border-radius: 6px;
+            border-radius: 4px;
             cursor: pointer;
-            font-size: 1rem;
-            transition: all 0.3s;
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
             display: inline-flex;
             align-items: center;
         }
 
         .btn:hover {
             background-color: #7a1717;
-            transform: translateY(-2px);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
         }
 
         .btn i {
-            margin-right: 0.5rem;
+            margin-right: 0.4rem;
+            font-size: clamp(1rem, 2.2vw, 1.2rem);
         }
 
         .table-container {
             background: #fff;
-            padding: 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: clamp(0.8rem, 1.5vw, 1.2rem);
+            border-radius: 5px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
             overflow-x: auto;
+            position: relative;
         }
 
         .table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 1rem;
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
         }
 
-        .table th, .table td {
-            padding: 1.2rem;
+        .table th,
+        .table td {
+            padding: clamp(0.5rem, 1.2vw, 0.8rem);
             border: 1px solid #e0e0e0;
             text-align: left;
+            min-width: clamp(70px, 12vw, 90px);
         }
 
         .table th {
             background: linear-gradient(145deg, #a52a2a 0%, #7a1717 100%);
             color: #fff;
             font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
 
         .table td {
             background: #fafafa;
             transition: background 0.3s;
+            word-break: break-word;
         }
 
         .table tr:nth-child(even) td {
@@ -316,9 +333,9 @@ $menu_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
         .table .btn {
-            margin-right: 0.5rem;
-            margin-top: 0.5rem;
-            padding: 0.5rem 1rem;
+            margin: 0.3rem 0.4rem;
+            padding: clamp(0.3rem, 0.8vw, 0.5rem) clamp(0.6rem, 1.2vw, 0.8rem);
+            font-size: clamp(0.85rem, 1.8vw, 1rem);
         }
 
         .modal {
@@ -340,33 +357,37 @@ $menu_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         .modal-content {
             background: #fff;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-            max-width: 500px;
-            width: 90%;
-        }
-        #edit-menu-item-modal > .modal-content {
-            height: 99%;
+            padding: clamp(0.8rem, 1.5vw, 1.2rem);
+            border-radius: 6px;
+            box-shadow: 0 5px 14px rgba(0, 0, 0, 0.15);
+            max-width: min(400px, 92vw);
+            width: 92%;
         }
 
         .modal-content h2 {
             color: #a52a2a;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.8rem;
+            font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+        }
+
+        .modal-content p {
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            color: #333;
+            margin-bottom: 0.8rem;
         }
 
         .modal-content .btn {
-            margin-top: 0rem;
+            margin-top: 0.4rem;
         }
 
         .toast {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
-            padding: 1rem 2rem;
-            border-radius: 6px;
+            bottom: clamp(8px, 1.5vw, 12px);
+            right: clamp(8px, 1.5vw, 12px);
+            padding: clamp(0.4rem, 1vw, 0.6rem) clamp(0.8rem, 1.5vw, 1rem);
+            border-radius: 4px;
             color: #fff;
-            font-size: 1rem;
+            font-size: clamp(0.85rem, 1.8vw, 1rem);
             opacity: 0;
             transition: opacity 0.3s;
             z-index: 1100;
@@ -384,37 +405,251 @@ $menu_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
             opacity: 1;
         }
 
+        /* Scroll shadow for table */
+        .table-container::before,
+        .table-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 12px;
+            pointer-events: none;
+            z-index: 11;
+            transition: opacity 0.3s;
+        }
+
+        .table-container::before {
+            left: 0;
+            background: linear-gradient(to right, rgba(0, 0, 0, 0.06), transparent);
+            opacity: 0;
+        }
+
+        .table-container::after {
+            right: 0;
+            background: linear-gradient(to left, rgba(0, 0, 0, 0.06), transparent);
+            opacity: 0;
+        }
+
+        .table-container.scroll-left::before {
+            opacity: 1;
+        }
+
+        .table-container.scroll-right::after {
+            opacity: 1;
+        }
+
+        /* Sidebar width adjustment */
         @media (max-width: 768px) {
             .dashboard-content {
-                margin-left: 220px;
-                max-width: 90%;
-                margin: 2rem auto;
-                padding: 2rem;
+                margin-left: calc(200px + 1rem); /* Sidebar (200px) + gap */
+                max-width: 95vw;
+                padding: clamp(0.8rem, 1.5vw, 1.2rem);
             }
 
-            .table th, .table td {
-                padding: 0.8rem;
+            .dashboard-content h1 {
+                font-size: clamp(1.5rem, 3.2vw, 1.9rem);
+            }
+
+            .table-container h2,
+            .form-container h2,
+            .modal-content h2 {
+                font-size: clamp(1.1rem, 2.2vw, 1.4rem);
+            }
+
+            .form-group label {
+                font-size: clamp(0.85rem, 1.8vw, 1rem);
+            }
+
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                padding: clamp(0.4rem, 1vw, 0.6rem);
+                font-size: clamp(0.85rem, 1.8vw, 1rem);
+            }
+
+            .form-group input[type="file"] {
+                padding: clamp(0.2rem, 0.6vw, 0.4rem);
+            }
+
+            .form-group p {
+                font-size: clamp(0.8rem, 1.6vw, 0.95rem);
+            }
+
+            .btn {
+                padding: clamp(0.4rem, 1vw, 0.6rem) clamp(0.6rem, 1.5vw, 1rem);
+                font-size: clamp(0.85rem, 1.8vw, 1rem);
+            }
+
+            .btn i {
+                font-size: clamp(0.9rem, 2vw, 1.1rem);
+            }
+
+            .table th,
+            .table td {
+                padding: clamp(0.4rem, 1vw, 0.6rem);
+                font-size: clamp(0.85rem, 1.8vw, 1rem);
+                min-width: clamp(65px, 11vw, 85px);
+            }
+
+            .table .btn {
+                margin: 0.2rem 0.3rem;
+                padding: clamp(0.25rem, 0.6vw, 0.4rem) clamp(0.5rem, 1vw, 0.7rem);
+                font-size: clamp(0.8rem, 1.6vw, 0.95rem);
+            }
+
+            .modal-content {
+                padding: clamp(0.6rem, 1.2vw, 1rem);
+                max-width: min(380px, 94vw);
+            }
+
+            .modal-content p {
+                font-size: clamp(0.85rem, 1.8vw, 1rem);
             }
         }
 
+        /* Navbar transition */
         @media (max-width: 600px) {
             .admin-container-menu {
                 flex-direction: column;
+                padding-top: 60px; /* Space for navbar */
             }
 
             .dashboard-content {
-                margin-left: auto;
-                max-width: 100%;
-                margin: 1rem;
-                padding: 1.5rem;
+                margin-left: 0;
+                margin: clamp(0.8rem, 1.8vw, 1rem);
+                max-width: 96vw;
+                padding: clamp(0.6rem, 1.2vw, 1rem);
             }
 
+            .dashboard-content h1 {
+                font-size: clamp(1.4rem, 3vw, 1.8rem);
+            }
+
+            .form-container {
+                padding: clamp(0.6rem, 1.2vw, 1rem);
+            }
+
+            .form-container h2 {
+                font-size: clamp(1rem, 2vw, 1.3rem);
+            }
+
+            .form-group label {
+                font-size: clamp(0.8rem, 1.6vw, 0.95rem);
+            }
+
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                padding: clamp(0.3rem, 0.8vw, 0.5rem);
+                font-size: clamp(0.8rem, 1.6vw, 0.95rem);
+            }
+
+            .form-group input[type="file"] {
+                padding: clamp(0.2rem, 0.5vw, 0.3rem);
+            }
+
+            .form-group p {
+                font-size: clamp(0.75rem, 1.4vw, 0.9rem);
+            }
+
+            .btn {
+                padding: clamp(0.3rem, 0.8vw, 0.5rem) clamp(0.5rem, 1.2vw, 0.8rem);
+                font-size: clamp(0.8rem, 1.6vw, 0.95rem);
+            }
+
+            .btn i {
+                font-size: clamp(0.8rem, 1.6vw, 1rem);
+            }
+
+            .table-container {
+                padding: clamp(0.6rem, 1.2vw, 1rem);
+            }
+
+            .table-container h2 {
+                font-size: clamp(1rem, 2vw, 1.3rem);
+            }
+
+            /* Stacked table layout */
             .table {
-                font-size: 0.9rem;
+                display: block;
+                font-size: clamp(0.8rem, 1.6vw, 0.95rem);
             }
 
-            .form-group input, .form-group select, .form-group textarea, .form-group input[type="file"] {
-                width: 100%;
+            .table thead {
+                display: none;
+            }
+
+            .table tbody,
+            .table tr {
+                display: block;
+            }
+
+            .table tr {
+                margin-bottom: 0.8rem;
+                border: 1px solid #e0e0e0;
+                border-radius: 4px;
+                background: #fafafa;
+            }
+
+            .table td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: clamp(0.3rem, 0.8vw, 0.5rem);
+                border: none;
+                border-bottom: 1px solid #e0e0e0;
+                min-width: 0;
+                text-align: right;
+            }
+
+            .table td:last-child {
+                border-bottom: none;
+            }
+
+            .table td::before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: #a52a2a;
+                text-align: left;
+                flex: 1;
+                white-space: nowrap;
+                margin-right: 0.5rem;
+            }
+
+            .table td.actions {
+                display: flex;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .table td.actions::before {
+                content: none;
+            }
+
+            .table .btn {
+                margin: clamp(0.2rem, 0.5vw, 0.3rem);
+                padding: clamp(0.2rem, 0.5vw, 0.3rem) clamp(0.4rem, 0.8vw, 0.6rem);
+                font-size: clamp(0.75rem, 1.4vw, 0.9rem);
+            }
+
+            .modal-content {
+                padding: clamp(0.5rem, 1vw, 0.8rem);
+                max-width: 95vw;
+            }
+
+            .modal-content h2 {
+                font-size: clamp(1rem, 2vw, 1.3rem);
+            }
+
+            .modal-content p {
+                font-size: clamp(0.8rem, 1.6vw, 0.95rem);
+            }
+
+            .toast {
+                padding: clamp(0.3rem, 0.8vw, 0.5rem) clamp(0.6rem, 1.2vw, 0.8rem);
+                font-size: clamp(0.75rem, 1.4vw, 0.9rem);
+                bottom: clamp(5px, 1vw, 8px);
+                right: clamp(5px, 1vw, 8px);
             }
         }
     </style>
@@ -422,12 +657,8 @@ $menu_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <body>
     <section class="admin-container-menu">
         <?php include '../../includes/admin_sidebar.php'; ?>
-        <!-- Toast Notification -->
-        <div class="toast" id="toast"></div>
         <div class="dashboard-content">
             <h1>Manage Menu Items</h1>
-
-            
 
             <!-- Add Menu Item Form -->
             <div class="form-container">
@@ -490,11 +721,11 @@ $menu_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <?php else: ?>
                             <?php foreach ($menu_items as $item): ?>
                                 <tr data-item-id="<?php echo $item['item_id']; ?>">
-                                    <td><?php echo sanitize($item['name']); ?></td>
-                                    <td>$<?php echo number_format($item['price'], 2); ?></td>
-                                    <td><?php echo sanitize($item['category']); ?></td>
-                                    <td><?php echo sanitize($item['description'] ?: 'None'); ?></td>
-                                    <td class="actions">
+                                    <td data-label="Name"><?php echo sanitize($item['name']); ?></td>
+                                    <td data-label="Price">$<?php echo number_format($item['price'], 2); ?></td>
+                                    <td data-label="Category"><?php echo sanitize($item['category']); ?></td>
+                                    <td data-label="Description"><?php echo sanitize($item['description'] ?: 'None'); ?></td>
+                                    <td data-label="Actions" class="actions">
                                         <button class="btn edit-btn" data-item='<?php echo json_encode($item); ?>'><i class="fas fa-edit"></i> Edit</button>
                                         <button class="btn delete-btn" data-item-id="<?php echo $item['item_id']; ?>"><i class="fas fa-trash"></i> Delete</button>
                                     </td>
@@ -504,69 +735,69 @@ $menu_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </tbody>
                 </table>
             </div>
-
         </div>
         <!-- Edit Menu Item Modal -->
         <div class="modal" id="edit-menu-item-modal">
-                <div class="modal-content">
-                    <h2>Edit Menu Item</h2>
-                    <form method="POST" enctype="multipart/form-data">
-                        <input type="hidden" name="action" value="edit">
-                        <input type="hidden" name="item_id" id="edit-item-id">
-                        <input type="hidden" name="csrf_token" value="<?php echo sanitize($csrf_token); ?>">
-                        <div class="form-group">
-                            <label for="edit-name"><i class="fas fa-utensils"></i> Name</label>
-                            <input type="text" id="edit-name" name="name" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="edit-price"><i class="fas fa-dollar-sign"></i> Price</label>
-                            <input type="number" id="edit-price" name="price" step="0.01" min="0" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="edit-category"><i class="fas fa-list"></i> Category</label>
-                            <select id="edit-category" name="category" required>
-                                <option value="Appetizer">Appetizer</option>
-                                <option value="Main Course">Main Course</option>
-                                <option value="Dessert">Dessert</option>
-                                <option value="Beverage">Beverage</option>
-                                <option value="Salad">Salad</option>
-                                <option value="Side">Side</option>
-                                <option value="Pasta">Pasta</option>
-                                <option value="Pizza">Pizza</option>
-                                <option value="Sushi">Sushi</option>
-                                <option value="Sandwich">Sandwich</option>
-                                <option value="Soup">Soup</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="edit-description"><i class="fas fa-info-circle"></i> Description (Optional)</label>
-                            <textarea id="edit-description" name="description"></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="edit-image"><i class="fas fa-image"></i> Image (Optional, JPEG/JPG/PNG, max 2MB)</label>
-                            <input type="file" id="edit-image" name="image" accept="image/jpeg,image/png,image/jpg">
-                            <p>Current: <span id="current-image"></span></p>
-                        </div>
-                        <button type="submit" class="btn"><i class="fas fa-save"></i> Update Menu Item</button>
-                        <button type="button" class="btn" id="cancel-edit-btn"><i class="fas fa-times"></i> Cancel</button>
-                    </form>
-                </div>
+            <div class="modal-content">
+                <h2>Edit Menu Item</h2>
+                <form method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="action" value="edit">
+                    <input type="hidden" name="item_id" id="edit-item-id">
+                    <input type="hidden" name="csrf_token" value="<?php echo sanitize($csrf_token); ?>">
+                    <div class="form-group">
+                        <label for="edit-name"><i class="fas fa-utensils"></i> Name</label>
+                        <input type="text" id="edit-name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-price"><i class="fas fa-dollar-sign"></i> Price</label>
+                        <input type="number" id="edit-price" name="price" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-category"><i class="fas fa-list"></i> Category</label>
+                        <select id="edit-category" name="category" required>
+                            <option value="Appetizer">Appetizer</option>
+                            <option value="Main Course">Main Course</option>
+                            <option value="Dessert">Dessert</option>
+                            <option value="Beverage">Beverage</option>
+                            <option value="Salad">Salad</option>
+                            <option value="Side">Side</option>
+                            <option value="Pasta">Pasta</option>
+                            <option value="Pizza">Pizza</option>
+                            <option value="Sushi">Sushi</option>
+                            <option value="Sandwich">Sandwich</option>
+                            <option value="Soup">Soup</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-description"><i class="fas fa-info-circle"></i> Description (Optional)</label>
+                        <textarea id="edit-description" name="description"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-image"><i class="fas fa-image"></i> Image (Optional, JPEG/JPG/PNG, max 2MB)</label>
+                        <input type="file" id="edit-image" name="image" accept="image/jpeg,image/png,image/jpg">
+                        <p>Current: <span id="current-image"></span></p>
+                    </div>
+                    <button type="submit" class="btn"><i class="fas fa-save"></i> Update Menu Item</button>
+                    <button type="button" class="btn" id="cancel-edit-btn"><i class="fas fa-times"></i> Cancel</button>
+                </form>
             </div>
+        </div>
 
-            <!-- Delete Confirmation Modal -->
-            <div class="modal" id="delete-menu-item-modal">
-                <div class="modal-content">
-                    <h2>Confirm Deletion</h2>
-                    <p>Are you sure you want to delete this menu item?</p>
-                    <form method="POST" id="delete-menu-item-form">
-                        <input type="hidden" name="action" value="delete">
-                        <input type="hidden" name="item_id" id="delete-item-id">
-                        <input type="hidden" name="csrf_token" value="<?php echo sanitize($csrf_token); ?>">
-                        <button type="submit" class="btn"><i class="fas fa-trash"></i> Confirm</button>
-                        <button type="button" class="btn" id="cancel-delete-btn"><i class="fas fa-times"></i> Cancel</button>
-                    </form>
-                </div>
+        <!-- Delete Confirmation Modal -->
+        <div class="modal" id="delete-menu-item-modal">
+            <div class="modal-content">
+                <h2>Confirm Deletion</h2>
+                <p>Are you sure you want to delete this menu item?</p>
+                <form method="POST" id="delete-menu-item-form">
+                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" name="item_id" id="delete-item-id">
+                    <input type="hidden" name="csrf_token" value="<?php echo sanitize($csrf_token); ?>">
+                    <button type="submit" class="btn"><i class="fas fa-trash"></i> Confirm</button>
+                    <button type="button" class="btn" id="cancel-delete-btn"><i class="fas fa-times"></i> Cancel</button>
+                </form>
             </div>
+        </div>
+        <div class="toast" id="toast"></div>
     </section>
 
     <script>

@@ -121,134 +121,140 @@ foreach ($reservations as $res) {
     <link rel="stylesheet" href="../../assets/css/styles.css">
     <link rel="stylesheet" href="../../assets/css/reset.css">
     <style>
-
         .admin-container-tables {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            max-width: 1500px;
-            margin-left: 5%;
-            box-shadow: none;
-            min-height: 100vh;
             background-color: #f9f9f9;
+            min-height: 80vh;
+            transition: padding-top 0.3s ease;
         }
 
         .dashboard-content {
             flex: 1;
-            margin: 3rem auto;
-            margin-left: 18%; /* Sidebar width + gap */
-            padding: 2.5rem;
-            background: linear-gradient(145deg, #ffffff 0%, #f0f0f0 100%);
-            border-radius: 10px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-            transition: transform 0.3s ease;
+            max-width: min(1200px, 94vw);
+            margin: clamp(1rem, 2vw, 1.5rem) auto;
+            margin-left: calc(250px + 1.5rem); /* Sidebar (250px) + gap */
+            padding: clamp(1rem, 2vw, 1.5rem);
+            background: #fff;
+            border-radius: 6px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease, margin 0.3s ease, padding 0.3s ease;
         }
 
         .dashboard-content:hover {
-            transform: translateY(-5px);
+            transform: translateY(-2px);
         }
 
         .dashboard-content h1 {
             color: #a52a2a;
-            font-size: 2rem;
-            margin-bottom: 1.5rem;
+            font-size: clamp(1.6rem, 3.5vw, 2rem);
+            margin-bottom: 1.2rem;
             text-align: center;
             font-weight: 600;
         }
 
-        .table-container h2, .form-container h2, .modal-content h2 {
+        .table-container h2,
+        .form-container h2,
+        .modal-content h2 {
             color: #a52a2a;
-            font-size: 1.5rem;
-            margin: 1.5rem 0 1rem;
+            font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+            margin: 1.2rem 0 0.8rem;
             font-weight: 500;
         }
 
         .form-container {
             background: #fff;
-            padding: 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            margin-bottom: 2rem;
-            width: 100%;
+            padding: clamp(0.8rem, 1.5vw, 1.2rem);
+            border-radius: 5px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+            margin-bottom: 1.5rem;
         }
 
         .form-group {
-            margin-bottom: 1rem;
+            margin-bottom: 0.8rem;
         }
 
         .form-group label {
             display: block;
             color: #333;
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            margin-bottom: 0.4rem;
         }
 
         .form-group input {
-            width: 94%;
-            padding: 0.8rem;
+            width: 100%;
+            padding: clamp(0.5rem, 1.2vw, 0.8rem);
             border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 1rem;
-            transition: border-color 0.3s;
+            border-radius: 4px;
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            transition: border-color 0.3s, box-shadow 0.3s;
         }
 
         .form-group input:focus {
             border-color: #a52a2a;
+            box-shadow: 0 0 4px rgba(165, 42, 42, 0.2);
             outline: none;
         }
 
         .btn {
             background-color: #a52a2a;
             color: #fff;
-            padding: 0.8rem 1.5rem;
+            padding: clamp(0.5rem, 1.2vw, 0.8rem) clamp(0.8rem, 1.8vw, 1.2rem);
             border: none;
-            border-radius: 6px;
+            border-radius: 4px;
             cursor: pointer;
-            font-size: 1rem;
-            transition: all 0.3s;
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
             display: inline-flex;
             align-items: center;
         }
 
         .btn:hover {
             background-color: #7a1717;
-            transform: translateY(-2px);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
         }
 
         .btn i {
-            margin-right: 0.5rem;
+            margin-right: 0.4rem;
+            font-size: clamp(1rem, 2.2vw, 1.2rem);
         }
 
         .table-container {
             background: #fff;
-            padding: 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: clamp(0.8rem, 1.5vw, 1.2rem);
+            border-radius: 5px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
             overflow-x: auto;
+            position: relative;
         }
 
         .table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 1rem;
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
         }
 
-        .table th, .table td {
-            padding: 1.2rem;
+        .table th,
+        .table td {
+            padding: clamp(0.5rem, 1.2vw, 0.8rem);
             border: 1px solid #e0e0e0;
             text-align: left;
+            min-width: clamp(70px, 12vw, 90px);
         }
 
         .table th {
             background: linear-gradient(145deg, #a52a2a 0%, #7a1717 100%);
             color: #fff;
             font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
 
         .table td {
             background: #fafafa;
             transition: background 0.3s;
+            word-break: break-word;
         }
 
         .table tr:nth-child(even) td {
@@ -271,15 +277,15 @@ foreach ($reservations as $res) {
         }
 
         .table td li {
-            margin: 0.5rem 0;
+            margin: 0.4rem 0;
             color: #555;
-            font-size: 0.95rem;
+            font-size: clamp(0.85rem, 1.8vw, 1rem);
         }
 
         .table .btn {
-            margin-right: 0.5rem;
-            margin-top: 0.5rem;
-            padding: 0.5rem 1rem;
+            margin: 0.3rem 0.4rem;
+            padding: clamp(0.3rem, 0.8vw, 0.5rem) clamp(0.6rem, 1.2vw, 0.8rem);
+            font-size: clamp(0.85rem, 1.8vw, 1rem);
         }
 
         .modal {
@@ -301,30 +307,31 @@ foreach ($reservations as $res) {
 
         .modal-content {
             background: #fff;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-            max-width: 500px;
-            width: 90%;
+            padding: clamp(0.8rem, 1.5vw, 1.2rem);
+            border-radius: 6px;
+            box-shadow: 0 5px 14px rgba(0, 0, 0, 0.15);
+            max-width: min(400px, 92vw);
+            width: 92%;
         }
 
         .modal-content h2 {
             color: #a52a2a;
-            margin-bottom: 1.5rem;
+            margin-bottom: 0.8rem;
+            font-size: clamp(1.2rem, 2.5vw, 1.5rem);
         }
 
         .modal-content .btn {
-            margin-top: 1rem;
+            margin-top: 0.4rem;
         }
 
         .toast {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
-            padding: 1rem 2rem;
-            border-radius: 6px;
+            bottom: clamp(8px, 1.5vw, 12px);
+            right: clamp(8px, 1.5vw, 12px);
+            padding: clamp(0.4rem, 1vw, 0.6rem) clamp(0.8rem, 1.5vw, 1rem);
+            border-radius: 4px;
             color: #fff;
-            font-size: 1rem;
+            font-size: clamp(0.85rem, 1.8vw, 1rem);
             opacity: 0;
             transition: opacity 0.3s;
             z-index: 1100;
@@ -342,37 +349,236 @@ foreach ($reservations as $res) {
             opacity: 1;
         }
 
-        @media (max-width: 768px) {
-            .dashboard-content {
-                margin-left: 220px;
-                max-width: 90%;
-                margin: 2rem auto;
-                padding: 2rem;
-            }
-
-            .table th, .table td {
-                padding: 0.8rem;
-            }
+        /* Scroll shadow for table */
+        .table-container::before,
+        .table-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 12px;
+            pointer-events: none;
+            z-index: 11;
+            transition: opacity 0.3s;
         }
 
-        @media (max-width: 600px) {
-            .admin-container-tables {
-                flex-direction: column;
-            }
+        .table-container::before {
+            left: 0;
+            background: linear-gradient(to right, rgba(0, 0, 0, 0.06), transparent);
+            opacity: 0;
+        }
 
+        .table-container::after {
+            right: 0;
+            background: linear-gradient(to left, rgba(0, 0, 0, 0.06), transparent);
+            opacity: 0;
+        }
+
+        .table-container.scroll-left::before {
+            opacity: 1;
+        }
+
+        .table-container.scroll-right::after {
+            opacity: 1;
+        }
+
+        /* Sidebar width adjustment */
+        @media (max-width: 768px) {
             .dashboard-content {
-                margin-left: auto;
-                max-width: 100%;
-                margin: 1rem;
-                padding: 1.5rem;
+                margin-left: calc(200px + 1rem); /* Sidebar (200px) + gap */
+                max-width: 95vw;
+                padding: clamp(0.8rem, 1.5vw, 1.2rem);
             }
 
-            .table {
-                font-size: 0.9rem;
+            .dashboard-content h1 {
+                font-size: clamp(1.5rem, 3.2vw, 1.9rem);
+            }
+
+            .table-container h2,
+            .form-container h2,
+            .modal-content h2 {
+                font-size: clamp(1.1rem, 2.2vw, 1.4rem);
+            }
+
+            .form-group label {
+                font-size: clamp(0.85rem, 1.8vw, 1rem);
             }
 
             .form-group input {
+                padding: clamp(0.4rem, 1vw, 0.6rem);
+                font-size: clamp(0.85rem, 1.8vw, 1rem);
+            }
+
+            .btn {
+                padding: clamp(0.4rem, 1vw, 0.6rem) clamp(0.6rem, 1.5vw, 1rem);
+                font-size: clamp(0.85rem, 1.8vw, 1rem);
+            }
+
+            .btn i {
+                font-size: clamp(0.9rem, 2vw, 1.1rem);
+            }
+
+            .table th,
+            .table td {
+                padding: clamp(0.4rem, 1vw, 0.6rem);
+                font-size: clamp(0.85rem, 1.8vw, 1rem);
+                min-width: clamp(65px, 11vw, 85px);
+            }
+
+            .table td li {
+                font-size: clamp(0.8rem, 1.6vw, 0.95rem);
+            }
+
+            .table .btn {
+                margin: 0.2rem 0.3rem;
+                padding: clamp(0.25rem, 0.6vw, 0.4rem) clamp(0.5rem, 1vw, 0.7rem);
+                font-size: clamp(0.8rem, 1.6vw, 0.95rem);
+            }
+
+            .modal-content {
+                padding: clamp(0.6rem, 1.2vw, 1rem);
+                max-width: min(380px, 94vw);
+            }
+        }
+
+        /* Navbar transition */
+        @media (max-width: 600px) {
+            .admin-container-tables {
+                flex-direction: column;
+                padding-top: 60px; /* Space for navbar */
+            }
+
+            .dashboard-content {
+                margin-left: 0;
+                margin: clamp(0.8rem, 1.8vw, 1rem);
+                max-width: 96vw;
+                padding: clamp(0.6rem, 1.2vw, 1rem);
+            }
+
+            .dashboard-content h1 {
+                font-size: clamp(1.4rem, 3vw, 1.8rem);
+            }
+
+            .form-container {
+                padding: clamp(0.6rem, 1.2vw, 1rem);
+            }
+
+            .form-container h2 {
+                font-size: clamp(1rem, 2vw, 1.3rem);
+            }
+
+            .form-group label {
+                font-size: clamp(0.8rem, 1.6vw, 0.95rem);
+            }
+
+            .form-group input {
+                padding: clamp(0.3rem, 0.8vw, 0.5rem);
+                font-size: clamp(0.8rem, 1.6vw, 0.95rem);
+            }
+
+            .btn {
+                padding: clamp(0.3rem, 0.8vw, 0.5rem) clamp(0.5rem, 1.2vw, 0.8rem);
+                font-size: clamp(0.8rem, 1.6vw, 0.95rem);
+            }
+
+            .btn i {
+                font-size: clamp(0.8rem, 1.6vw, 1rem);
+            }
+
+            .table-container {
+                padding: clamp(0.6rem, 1.2vw, 1rem);
+            }
+
+            .table-container h2 {
+                font-size: clamp(1rem, 2vw, 1.3rem);
+            }
+
+            /* Stacked table layout */
+            .table {
+                display: block;
+                font-size: clamp(0.8rem, 1.6vw, 0.95rem);
+            }
+
+            .table thead {
+                display: none;
+            }
+
+            .table tbody,
+            .table tr {
+                display: block;
+            }
+
+            .table tr {
+                margin-bottom: 0.8rem;
+                border: 1px solid #e0e0e0;
+                border-radius: 4px;
+                background: #fafafa;
+            }
+
+            .table td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: clamp(0.3rem, 0.8vw, 0.5rem);
+                border: none;
+                border-bottom: 1px solid #e0e0e0;
+                min-width: 0;
+                text-align: right;
+            }
+
+            .table td:last-child {
+                border-bottom: none;
+            }
+
+            .table td::before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: #a52a2a;
+                text-align: left;
+                flex: 1;
+                white-space: nowrap;
+                margin-right: 0.5rem;
+            }
+
+            .table td.actions {
+                display: flex;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .table td.actions::before {
+                content: none;
+            }
+
+            .table td ul {
                 width: 100%;
+                text-align: left;
+            }
+
+            .table td li {
+                font-size: clamp(0.75rem, 1.4vw, 0.9rem);
+            }
+
+            .table .btn {
+                margin: clamp(0.2rem, 0.5vw, 0.3rem);
+                padding: clamp(0.2rem, 0.5vw, 0.3rem) clamp(0.4rem, 0.8vw, 0.6rem);
+                font-size: clamp(0.75rem, 1.4vw, 0.9rem);
+            }
+
+            .modal-content {
+                padding: clamp(0.5rem, 1vw, 0.8rem);
+                max-width: 95vw;
+            }
+
+            .modal-content h2 {
+                font-size: clamp(1rem, 2vw, 1.3rem);
+            }
+
+            .toast {
+                padding: clamp(0.3rem, 0.8vw, 0.5rem) clamp(0.6rem, 1.2vw, 0.8rem);
+                font-size: clamp(0.75rem, 1.4vw, 0.9rem);
+                bottom: clamp(5px, 1vw, 8px);
+                right: clamp(5px, 1vw, 8px);
             }
         }
     </style>
@@ -424,10 +630,10 @@ foreach ($reservations as $res) {
                         <?php else: ?>
                             <?php foreach ($tables as $table): ?>
                                 <tr>
-                                    <td><?php echo sanitize($table['table_number']); ?></td>
-                                    <td><?php echo sanitize($table['capacity']); ?></td>
-                                    <td><?php echo sanitize($table['description'] ?: 'None'); ?></td>
-                                    <td>
+                                    <td data-label="Table Number"><?php echo sanitize($table['table_number']); ?></td>
+                                    <td data-label="Capacity"><?php echo sanitize($table['capacity']); ?></td>
+                                    <td data-label="Description"><?php echo sanitize($table['description'] ?: 'None'); ?></td>
+                                    <td data-label="Upcoming Reservations">
                                         <?php
                                         $table_res = $reservations_by_table[$table['table_number']] ?? [];
                                         if (empty($table_res)) {
@@ -442,7 +648,7 @@ foreach ($reservations as $res) {
                                         }
                                         ?>
                                     </td>
-                                    <td class="actions">
+                                    <td data-label="Actions" class="actions">
                                         <button class="btn edit-btn" data-table='<?php echo json_encode($table); ?>'><i class="fas fa-edit"></i> Edit</button>
                                         <button class="btn delete-btn" data-table-id="<?php echo $table['table_id']; ?>"><i class="fas fa-trash"></i> Delete</button>
                                     </td>
@@ -455,44 +661,44 @@ foreach ($reservations as $res) {
         </div>
         <!-- Edit Table Modal -->
         <div class="modal" id="edit-table-modal">
-                <div class="modal-content">
-                    <h2>Edit Table</h2>
-                    <form method="POST" id="edit-table-form">
-                        <input type="hidden" name="action" value="edit">
-                        <input type="hidden" name="table_id" id="edit-table-id">
-                        <input type="hidden" name="csrf_token" value="<?php echo sanitize($csrf_token); ?>">
-                        <div class="form-group">
-                            <label for="edit-table-number"><i class="fas fa-hashtag"></i> Table Number</label>
-                            <input type="number" id="edit-table-number" name="table_number" required min="1">
-                        </div>
-                        <div class="form-group">
-                            <label for="edit-capacity"><i class="fas fa-users"></i> Capacity</label>
-                            <input type="number" id="edit-capacity" name="capacity" required min="1">
-                        </div>
-                        <div class="form-group">
-                            <label for="edit-description"><i class="fas fa-info-circle"></i> Description (Optional)</label>
-                            <input type="text" id="edit-description" name="description">
-                        </div>
-                        <button type="submit" class="btn"><i class="fas fa-save"></i> Update Table</button>
-                        <button type="button" class="btn" id="cancel-edit-btn"><i class="fas fa-times"></i> Cancel</button>
-                    </form>
-                </div>
+            <div class="modal-content">
+                <h2>Edit Table</h2>
+                <form method="POST" id="edit-table-form">
+                    <input type="hidden" name="action" value="edit">
+                    <input type="hidden" name="table_id" id="edit-table-id">
+                    <input type="hidden" name="csrf_token" value="<?php echo sanitize($csrf_token); ?>">
+                    <div class="form-group">
+                        <label for="edit-table-number"><i class="fas fa-hashtag"></i> Table Number</label>
+                        <input type="number" id="edit-table-number" name="table_number" required min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-capacity"><i class="fas fa-users"></i> Capacity</label>
+                        <input type="number" id="edit-capacity" name="capacity" required min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-description"><i class="fas fa-info-circle"></i> Description (Optional)</label>
+                        <input type="text" id="edit-description" name="description">
+                    </div>
+                    <button type="submit" class="btn"><i class="fas fa-save"></i> Update Table</button>
+                    <button type="button" class="btn" id="cancel-edit-btn"><i class="fas fa-times"></i> Cancel</button>
+                </form>
             </div>
+        </div>
 
-            <!-- Delete Confirmation Modal -->
-            <div class="modal" id="delete-table-modal">
-                <div class="modal-content">
-                    <h2>Confirm Deletion</h2>
-                    <p>Are you sure you want to delete this table?</p>
-                    <form method="POST" id="delete-table-form">
-                        <input type="hidden" name="action" value="delete">
-                        <input type="hidden" name="table_id" id="delete-table-id">
-                        <input type="hidden" name="csrf_token" value="<?php echo sanitize($csrf_token); ?>">
-                        <button type="submit" class="btn"><i class="fas fa-trash"></i> Confirm</button>
-                        <button type="button" class="btn" id="cancel-delete-btn"><i class="fas fa-times"></i> Cancel</button>
-                    </form>
-                </div>
+        <!-- Delete Confirmation Modal -->
+        <div class="modal" id="delete-table-modal">
+            <div class="modal-content">
+                <h2>Confirm Deletion</h2>
+                <p>Are you sure you want to delete this table?</p>
+                <form method="POST" id="delete-table-form">
+                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" name="table_id" id="delete-table-id">
+                    <input type="hidden" name="csrf_token" value="<?php echo sanitize($csrf_token); ?>">
+                    <button type="submit" class="btn"><i class="fas fa-trash"></i> Confirm</button>
+                    <button type="button" class="btn" id="cancel-delete-btn"><i class="fas fa-times"></i> Cancel</button>
+                </form>
             </div>
+        </div>
         <div class="toast" id="toast"></div>
     </section>
 
