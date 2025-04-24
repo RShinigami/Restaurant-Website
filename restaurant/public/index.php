@@ -168,29 +168,6 @@ $logo_path = '../assets/images/logo.png';
         <?php endforeach; ?>
     </section>
 
-    <section class="dashboard">
-        <h2>Your Dashboard</h2>
-        <div class="dashboard-actions">
-            <a href="order.php" class="action-card">
-                <h3>Order Food</h3>
-                <p>Browse our menu and place an order.</p>
-            </a>
-            <a href="reserve.php" class="action-card">
-                <h3>Reserve a Table</h3>
-                <p>Book a table for your next visit.</p>
-            </a>
-            <a href="account.php" class="action-card">
-                <h3>Your Account</h3>
-                <p>View your details and order history.</p>
-            </a>
-            <?php if (isAdmin()): ?>
-                <a href="admin/dashboard.php" class="action-card">
-                    <h3>Admin Dashboard</h3>
-                    <p>Manage customers, menu, and orders.</p>
-                </a>
-            <?php endif; ?>
-        </div>
-    </section>
 <?php endif; ?>
 
 <?php include '../includes/footer.php'; ?>

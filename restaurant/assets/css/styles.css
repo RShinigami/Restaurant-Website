@@ -142,7 +142,6 @@ nav ul li a:hover {
 .category-section {
   margin-bottom: 3rem;
   padding-bottom: 2rem;
-  border-bottom: 2px solid #ffd700;
 }
 .category-section h3 {
   color: #a52a2a;
@@ -672,6 +671,7 @@ button:active {
   -ms-transform: scale(0.95);
   -o-transform: scale(0.95);
 }
+
 .cart-count {
   background: #ffd700;
   color: #a52a2a;
@@ -1130,9 +1130,9 @@ footer {
     height: 100vh;
   }
   .cart-toggle {
-    left: -70px;
+    left: -100px;
     padding: 1rem;
-    top: 10px;
+    top: 80px;
     border-radius: 12px 0 0 12px;
     font-size: 1.5rem;
     height: 60px;

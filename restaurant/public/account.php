@@ -440,14 +440,16 @@ unset($order);
 
     .modal-content .btn {
         margin-top: 0.4rem;
-        padding: clamp(0.5rem, 1.2vw, 0.8rem) clamp(0.8rem, 1.8vw, 1.2rem);
-        font-size: clamp(0.9rem, 2vw, 1.1rem);
+        padding: clamp(0.6rem, 1.5vw, 0.9rem) clamp(1rem, 2vw, 1.2rem);
+        font-size: clamp(0.9rem, 1.8vw, 1.1rem);
         background-color: #a52a2a;
         color: #fff;
         border: none;
-        border-radius: 4px;
+        border-radius: 6px;
         cursor: pointer;
         transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+        min-height: 40px;
+        min-width: 100px;
     }
 
     .modal-content .btn:hover {
@@ -496,8 +498,10 @@ unset($order);
         }
 
         .modal-content .btn {
-            padding: clamp(0.4rem, 1vw, 0.6rem) clamp(0.6rem, 1.5vw, 1rem);
-            font-size: clamp(0.85rem, 1.8vw, 1rem);
+            padding: clamp(0.6rem, 1.5vw, 0.9rem) clamp(1rem, 2vw, 1.2rem);
+            font-size: clamp(0.9rem, 1.8vw, 1.1rem);
+            min-height: 40px;
+            min-width: 100px;
         }
 
         .toast {
@@ -521,8 +525,10 @@ unset($order);
         }
 
         .modal-content .btn {
-            padding: clamp(0.3rem, 0.8vw, 0.5rem) clamp(0.5rem, 1.2vw, 0.8rem);
-            font-size: clamp(0.8rem, 1.6vw, 0.95rem);
+            padding: clamp(0.6rem, 1.5vw, 0.9rem) clamp(1rem, 2vw, 1.2rem);
+            font-size: clamp(0. deportivo9rem, 1.8vw, 1.1rem);
+            min-height: 40px;
+            min-width: 100px;
         }
 
         .toast {
@@ -532,11 +538,22 @@ unset($order);
             right: clamp(5px, 1vw, 8px);
         }
 
-        /* Stacked table layout */
+        /* Improved wide table layout */
+        .reservations-container,
+        .orders-container {
+            width: 100%;
+            padding: clamp(0.8rem, 1.5vw, 1rem);
+            box-sizing: border-box;
+        }
+
         .reservations-table,
         .orders-table {
             display: block;
-            font-size: clamp(0.8rem, 1.6vw, 0.95rem);
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+            font-size: clamp(0.9rem, 1.8vw, 1.1rem);
+            line-height: 1.5;
         }
 
         .reservations-table thead,
@@ -549,54 +566,91 @@ unset($order);
         .orders-table tbody,
         .orders-table tr {
             display: block;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .reservations-table tr,
         .orders-table tr {
-            margin-bottom: 0.8rem;
-            border: 1px solid #e0e0e0;
-            border-radius: 4px;
-            background: #fafafa;
+            margin-bottom: 1.2rem;
+            padding: clamp(0.8rem, 1.5vw, 1rem);
+            border: 1px solid #d1d1d1;
+            border-radius: 8px;
+            background: #ffffff;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
         }
 
         .reservations-table td,
         .orders-table td {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: clamp(0.3rem, 0.8vw, 0.5rem);
+            flex-direction: column;
+            align-items: flex-start;
+            width: 100%;
+            padding: clamp(0.6rem, 1.2vw, 0.8rem);
             border: none;
-            border-bottom: 1px solid #e0e0e0;
-            text-align: right;
+            text-align: left;
+            white-space: normal;
+            box-sizing: border-box;
         }
 
-        .reservations-table td:last-child,
-        .orders-table td:last-child {
-            border-bottom: none;
+        .reservations-table td[data-label="Special Requests"],
+        .orders-table td[data-label="Items"] {
+            max-height: 120px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            word-wrap: break-word;
+            width: 100%;
         }
 
         .reservations-table td::before,
         .orders-table td::before {
             content: attr(data-label);
-            font-weight: 600;
+            display: block;
+            font-weight: 700;
             color: #a52a2a;
-            text-align: left;
-            flex: 1;
-            white-space: nowrap;
-            margin-right: 0.5rem;
+            font-size: clamp(0.9rem, 1.8vw, 1.1rem);
+            margin-bottom: 0.3rem;
         }
 
         .reservations-table td ul,
         .orders-table td ul {
-            padding-left: 0;
+            padding: 0;
+            margin: 0;
             list-style: none;
-            text-align: left;
-            flex: 2;
+            width: 100%;
+            word-wrap: break-word;
         }
 
         .reservations-table td ul li,
         .orders-table td ul li {
-            font-size: clamp(0.8rem, 1.6vw, 0.95rem);
+            font-size: clamp(0.85rem, 1.8vw, 1rem);
+            margin-bottom: 0.4rem;
+        }
+
+        .reservations-table td[data-label="Actions"],
+        .orders-table td[data-label="Actions"] {
+            align-items: flex-end;
+        }
+
+        .reservations-table td[data-label="Actions"] .btn,
+        .orders-table td[data-label="Actions"] .btn {
+            padding: clamp(0.6rem, 1.5vw, 0.9rem) clamp(1rem, 2vw, 1.2rem);
+            font-size: clamp(0.9rem, 1.8vw, 1.1rem);
+            min-height: 40px;
+            min-width: 100px;
+            background-color: #a52a2a;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+        }
+
+        .reservations-table td[data-label="Actions"] .btn:hover,
+        .orders-table td[data-label="Actions"] .btn:hover {
+            background-color: #7a1717;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
         }
     }
 </style>

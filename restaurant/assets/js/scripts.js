@@ -7,7 +7,13 @@ document.addEventListener("DOMContentLoaded", () => {
   // Toggle dropdown menu
   if (navToggle && navMenu) {
     navToggle.addEventListener("click", () => {
+      const cartToggle = document.querySelector(".cart-toggle");
       navMenu.classList.toggle("active");
+      if (cartToggle.style.display === "none") {
+        cartToggle.style.display = "block";
+      } else {
+        cartToggle.style.display = "none";
+      }
     });
   }
 
