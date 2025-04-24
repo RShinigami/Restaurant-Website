@@ -13,10 +13,9 @@ if (!isset($_SESSION['customer_id']) || !$_SESSION['is_admin']) {
 $csrf_token = generateCsrfToken();
 $active_page = 'manage_menu_items.php';
 
-// Initialize messages
-$error_message = '';
-$success_message = isset($_SESSION['success_message']) ? $_SESSION['success_message'] : '';
-unset($_SESSION['success_message']); // Clear after use
+// Initialize session messages
+$_SESSION['success_message'] = $_SESSION['success_message'] ?? '';
+$_SESSION['error_message'] = $_SESSION['error_message'] ?? '';
 
 // Upload directory
 $upload_dir = '../../public/uploads/';
@@ -32,7 +31,7 @@ if (!is_dir($upload_dir)) {
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!isset($_POST['csrf_token']) || !validateCsrfToken($_POST['csrf_token'])) {
-        $error_message = 'Invalid CSRF token.';
+        $_SESSION['error_message'] = 'Invalid CSRF token.';
     } else {
         try {
             $action = $_POST['action'] ?? '';
@@ -120,9 +119,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmt->execute([$name, $price, $category, $description ?: null, $image_path, $item_id]);
                     $_SESSION['success_message'] = 'Menu item updated successfully!';
                 }
-                // Redirect to prevent form resubmission
-                header('Location: manage_menu_items.php');
-                exit;
             } elseif ($action === 'delete') {
                 $item_id = filter_input(INPUT_POST, 'item_id', FILTER_VALIDATE_INT);
                 if (!$item_id) {
@@ -142,14 +138,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
 
                 $_SESSION['success_message'] = 'Menu item deleted successfully!';
-                // Redirect to prevent form resubmission
-                header('Location: manage_menu_items.php');
-                exit;
             }
         } catch (Exception $e) {
-            $error_message = $e->getMessage();
+            $_SESSION['error_message'] = $e->getMessage();
         }
     }
+
+    // Redirect to prevent form resubmission
+    header('Location: manage_menu_items.php');
+    exit;
 }
 
 // Fetch all menu items
@@ -167,20 +164,15 @@ $menu_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <link rel="stylesheet" href="../../assets/css/styles.css">
     <link rel="stylesheet" href="../../assets/css/reset.css">
     <style>
-        body {
-            font-family: 'Roboto', Arial, sans-serif;
-            background: linear-gradient(135deg, #f9f9f9 0%, #e0e0e0 100%);
-            margin: 0;
-        }
 
-        .admin-container {
+        .admin-container-menu {
             width: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
             box-shadow: none;
             min-height: 100vh;
-            background: linear-gradient(135deg, #f9f9f9 0%, #e0e0e0 100%);
+            background-color: #f9f9f9;
         }
 
         .dashboard-content {
@@ -354,47 +346,42 @@ $menu_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
             max-width: 500px;
             width: 90%;
         }
+        #edit-menu-item-modal > .modal-content {
+            height: 99%;
+        }
 
         .modal-content h2 {
             color: #a52a2a;
-            margin-bottom: 1.5rem;
+            margin-bottom: 0.5rem;
         }
 
         .modal-content .btn {
-            margin-top: 1rem;
-        }
-
-        .message {
-            padding: 1rem;
-            border-radius: 6px;
-            margin-bottom: 1rem;
-            text-align: center;
-            font-size: 1rem;
-        }
-
-        .message.error {
-            background: #dc3545;
-            color: #fff;
+            margin-top: 0rem;
         }
 
         .toast {
             position: fixed;
-            top: 20px;
+            bottom: 20px;
             right: 20px;
-            background: #28a745;
-            color: #fff;
-            padding: 1rem 1.5rem;
+            padding: 1rem 2rem;
             border-radius: 6px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            z-index: 2000;
+            color: #fff;
+            font-size: 1rem;
             opacity: 0;
-            transition: opacity 0.5s ease, transform 0.5s ease;
-            transform: translateY(-20px);
+            transition: opacity 0.3s;
+            z-index: 1100;
         }
 
-        .toast.show {
+        .toast.success {
+            background: #28a745;
+        }
+
+        .toast.error {
+            background: #dc3545;
+        }
+
+        .toast.active {
             opacity: 1;
-            transform: translateY(0);
         }
 
         @media (max-width: 768px) {
@@ -408,16 +395,10 @@ $menu_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
             .table th, .table td {
                 padding: 0.8rem;
             }
-
-            .toast {
-                right: 10px;
-                left: 10px;
-                top: 10px;
-            }
         }
 
         @media (max-width: 600px) {
-            .admin-container {
+            .admin-container-menu {
                 flex-direction: column;
             }
 
@@ -439,20 +420,14 @@ $menu_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </style>
 </head>
 <body>
-    <section class="admin-container">
+    <section class="admin-container-menu">
         <?php include '../../includes/admin_sidebar.php'; ?>
+        <!-- Toast Notification -->
+        <div class="toast" id="toast"></div>
         <div class="dashboard-content">
             <h1>Manage Menu Items</h1>
 
-            <!-- Error Messages -->
-            <?php if ($error_message): ?>
-                <div class="message error"><?php echo sanitize($error_message); ?></div>
-            <?php endif; ?>
-
-            <!-- Toast Notification -->
-            <?php if ($success_message): ?>
-                <div class="toast" id="success-toast"><?php echo sanitize($success_message); ?></div>
-            <?php endif; ?>
+            
 
             <!-- Add Menu Item Form -->
             <div class="form-container">
@@ -521,12 +496,7 @@ $menu_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     <td><?php echo sanitize($item['description'] ?: 'None'); ?></td>
                                     <td class="actions">
                                         <button class="btn edit-btn" data-item='<?php echo json_encode($item); ?>'><i class="fas fa-edit"></i> Edit</button>
-                                        <form method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this menu item?');">
-                                            <input type="hidden" name="action" value="delete">
-                                            <input type="hidden" name="item_id" value="<?php echo $item['item_id']; ?>">
-                                            <input type="hidden" name="csrf_token" value="<?php echo sanitize($csrf_token); ?>">
-                                            <button type="submit" class="btn"><i class="fas fa-trash"></i> Delete</button>
-                                        </form>
+                                        <button class="btn delete-btn" data-item-id="<?php echo $item['item_id']; ?>"><i class="fas fa-trash"></i> Delete</button>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -535,8 +505,9 @@ $menu_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 </table>
             </div>
 
-            <!-- Edit Menu Item Modal -->
-            <div class="modal" id="edit-menu-item-modal">
+        </div>
+        <!-- Edit Menu Item Modal -->
+        <div class="modal" id="edit-menu-item-modal">
                 <div class="modal-content">
                     <h2>Edit Menu Item</h2>
                     <form method="POST" enctype="multipart/form-data">
@@ -581,79 +552,100 @@ $menu_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </form>
                 </div>
             </div>
-        </div>
+
+            <!-- Delete Confirmation Modal -->
+            <div class="modal" id="delete-menu-item-modal">
+                <div class="modal-content">
+                    <h2>Confirm Deletion</h2>
+                    <p>Are you sure you want to delete this menu item?</p>
+                    <form method="POST" id="delete-menu-item-form">
+                        <input type="hidden" name="action" value="delete">
+                        <input type="hidden" name="item_id" id="delete-item-id">
+                        <input type="hidden" name="csrf_token" value="<?php echo sanitize($csrf_token); ?>">
+                        <button type="submit" class="btn"><i class="fas fa-trash"></i> Confirm</button>
+                        <button type="button" class="btn" id="cancel-delete-btn"><i class="fas fa-times"></i> Cancel</button>
+                    </form>
+                </div>
+            </div>
     </section>
 
     <script>
-        // Debugging: Log when script runs
-        console.log('manage_menu_items.php JavaScript loaded');
+        // Show toast notification
+        function showToast(message, type) {
+            const toast = document.getElementById("toast");
+            if (toast) {
+                toast.textContent = message;
+                toast.className = `toast ${type} active`;
+                setTimeout(() => {
+                    toast.className = "toast";
+                }, 2000);
+            }
+        }
+
+        // Display session-based toast messages on page load
+        window.addEventListener("load", () => {
+            const successMessage = "<?php echo addslashes($_SESSION['success_message']); ?>";
+            const errorMessage = "<?php echo addslashes($_SESSION['error_message']); ?>";
+            if (successMessage) {
+                showToast(successMessage, "success");
+            } else if (errorMessage) {
+                showToast(errorMessage, "error");
+            }
+            // Clear session messages
+            <?php unset($_SESSION['success_message'], $_SESSION['error_message']); ?>
+        });
 
         // Edit modal handlers
-        try {
-            document.querySelectorAll(".edit-btn").forEach(button => {
-                console.log('Attaching event listener to edit button:', button);
-                button.addEventListener("click", () => {
-                    console.log('Edit button clicked:', button);
-                    try {
-                        const item = JSON.parse(button.getAttribute("data-item"));
-                        console.log('Item data:', item);
-                        document.getElementById("edit-item-id").value = item.item_id;
-                        document.getElementById("edit-name").value = item.name;
-                        document.getElementById("edit-price").value = item.price;
-                        document.getElementById("edit-category").value = item.category;
-                        document.getElementById("edit-description").value = item.description || "";
-                        document.getElementById("current-image").innerHTML = item.image_path 
-                            ? `<a href="/restaurant/public/${item.image_path}" target="_blank">${item.image_path}</a>` 
-                            : 'No image';
-                        document.getElementById("edit-menu-item-modal").classList.add("active");
-                    } catch (e) {
-                        console.error('Error in edit button handler:', e);
-                    }
-                });
-            });
-        } catch (e) {
-            console.error('Error attaching edit button listeners:', e);
-        }
+        const editModal = document.getElementById("edit-menu-item-modal");
+        const cancelEditBtn = document.getElementById("cancel-edit-btn");
 
-        // Cancel edit
-        try {
-            document.getElementById("cancel-edit-btn").addEventListener("click", () => {
-                console.log('Cancel edit button clicked');
-                document.getElementById("edit-menu-item-modal").classList.remove("active");
+        document.querySelectorAll(".edit-btn").forEach(button => {
+            button.addEventListener("click", () => {
+                const item = JSON.parse(button.getAttribute("data-item"));
+                document.getElementById("edit-item-id").value = item.item_id;
+                document.getElementById("edit-name").value = item.name;
+                document.getElementById("edit-price").value = item.price;
+                document.getElementById("edit-category").value = item.category;
+                document.getElementById("edit-description").value = item.description || "";
+                document.getElementById("current-image").innerHTML = item.image_path 
+                    ? `<a href="/restaurant/public/${item.image_path}" target="_blank">${item.image_path}</a>` 
+                    : 'No image';
+                editModal.classList.add("active");
             });
-        } catch (e) {
-            console.error('Error in cancel edit handler:', e);
-        }
+        });
 
-        // Close modal on outside click
-        try {
-            document.getElementById("edit-menu-item-modal").addEventListener("click", (e) => {
-                if (e.target === e.currentTarget) {
-                    console.log('Modal outside click');
-                    e.currentTarget.classList.remove("active");
-                }
-            });
-        } catch (e) {
-            console.error('Error in modal outside click handler:', e);
-        }
+        cancelEditBtn.addEventListener("click", () => {
+            editModal.classList.remove("active");
+        });
 
-        // Toast notification handler
-        try {
-            window.addEventListener("load", () => {
-                console.log('Window loaded, checking for toast');
-                const toast = document.getElementById("success-toast");
-                if (toast) {
-                    console.log('Showing toast');
-                    toast.classList.add("show");
-                    setTimeout(() => {
-                        console.log('Hiding toast');
-                        toast.classList.remove("show");
-                    }, 2000);
-                }
+        editModal.addEventListener("click", (e) => {
+            if (e.target === editModal) {
+                editModal.classList.remove("active");
+            }
+        });
+
+        // Delete modal handlers
+        const deleteModal = document.getElementById("delete-menu-item-modal");
+        const deleteForm = document.getElementById("delete-menu-item-form");
+        const cancelDeleteBtn = document.getElementById("cancel-delete-btn");
+
+        document.querySelectorAll(".delete-btn").forEach(button => {
+            button.addEventListener("click", () => {
+                const itemId = button.getAttribute("data-item-id");
+                document.getElementById("delete-item-id").value = itemId;
+                deleteModal.classList.add("active");
             });
-        } catch (e) {
-            console.error('Error in toast handler:', e);
-        }
+        });
+
+        cancelDeleteBtn.addEventListener("click", () => {
+            deleteModal.classList.remove("active");
+        });
+
+        deleteModal.addEventListener("click", (e) => {
+            if (e.target === deleteModal) {
+                deleteModal.classList.remove("active");
+            }
+        });
     </script>
 
     <?php include '../../includes/footer.php'; ?>

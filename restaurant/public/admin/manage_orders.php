@@ -122,20 +122,15 @@ try {
     <link rel="stylesheet" href="../../assets/css/styles.css">
     <link rel="stylesheet" href="../../assets/css/reset.css">
     <style>
-        body {
-            font-family: 'Roboto', Arial, sans-serif;
-            background: linear-gradient(135deg, #f9f9f9 0%, #e0e0e0 100%);
-            margin: 0;
-        }
 
-        .admin-container {
+        .admin-container-orders {
             width: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
             box-shadow: none;
             min-height: 100vh;
-            background: linear-gradient(135deg, #f9f9f9 0%, #e0e0e0 100%);
+            background-color: #f9f9f9;
         }
 
         .dashboard-content {
@@ -283,7 +278,7 @@ try {
         }
 
         @media (max-width: 600px) {
-            .admin-container {
+            .admin-container-orders {
                 flex-direction: column;
             }
 
@@ -301,7 +296,7 @@ try {
     </style>
 </head>
 <body>
-    <section class="admin-container">
+    <section class="admin-container-orders">
         <?php include '../../includes/admin_sidebar.php'; ?>
         <div class="dashboard-content">
             <h1>Manage Orders</h1>

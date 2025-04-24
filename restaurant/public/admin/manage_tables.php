@@ -121,26 +121,21 @@ foreach ($reservations as $res) {
     <link rel="stylesheet" href="../../assets/css/styles.css">
     <link rel="stylesheet" href="../../assets/css/reset.css">
     <style>
-        /* Page-specific styles */
-        body {
-            font-family: 'Roboto', Arial, sans-serif;
-            background: linear-gradient(135deg, #f9f9f9 0%, #e0e0e0 100%);
-            margin: 0;
-        }
 
-        .admin-container {
-            width: 100%;
+        .admin-container-tables {
             display: flex;
             align-items: center;
             justify-content: center;
+            flex-direction: column;
+            max-width: 1500px;
+            margin-left: 5%;
             box-shadow: none;
             min-height: 100vh;
-            background: linear-gradient(135deg, #f9f9f9 0%, #e0e0e0 100%);
+            background-color: #f9f9f9;
         }
 
         .dashboard-content {
             flex: 1;
-            max-width: 1500px; /* Wider for table */
             margin: 3rem auto;
             margin-left: 18%; /* Sidebar width + gap */
             padding: 2.5rem;
@@ -361,7 +356,7 @@ foreach ($reservations as $res) {
         }
 
         @media (max-width: 600px) {
-            .admin-container {
+            .admin-container-tables {
                 flex-direction: column;
             }
 
@@ -383,7 +378,7 @@ foreach ($reservations as $res) {
     </style>
 </head>
 <body>
-    <section class="admin-container">
+    <section class="admin-container-tables">
         <?php include '../../includes/admin_sidebar.php'; ?>
         <div class="dashboard-content">
             <h1>Manage Tables</h1>

@@ -13,110 +13,117 @@ if (!isset($_SESSION['customer_id']) || !$_SESSION['is_admin']) {
 $csrf_token = generateCsrfToken();
 $active_page = 'manage_customers.php';
 
+// Initialize session messages
+$_SESSION['success_message'] = $_SESSION['success_message'] ?? '';
+$_SESSION['error_message'] = $_SESSION['error_message'] ?? '';
+
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!validateCsrfToken($_POST['csrf_token'])) {
-        die('Invalid CSRF token.');
-    }
+        $_SESSION['error_message'] = 'Invalid CSRF token.';
+    } else {
+        $action = $_POST['action'] ?? '';
+        $errors = [];
 
-    $action = $_POST['action'] ?? '';
-    $errors = [];
+        if ($action === 'add' || $action === 'edit') {
+            $username = trim(filter_input(INPUT_POST, 'username', FILTER_SANITIZE_SPECIAL_CHARS));
+            $email = trim(filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL));
+            $phone = trim(filter_input(INPUT_POST, 'phone', FILTER_SANITIZE_SPECIAL_CHARS));
+            $password = $_POST['password'] ?? '';
+            $is_admin = isset($_POST['is_admin']) ? 1 : 0;
 
-    if ($action === 'add' || $action === 'edit') {
-        $username = trim(filter_input(INPUT_POST, 'username', FILTER_SANITIZE_SPECIAL_CHARS));
-        $email = trim(filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL));
-        $phone = trim(filter_input(INPUT_POST, 'phone', FILTER_SANITIZE_SPECIAL_CHARS));
-        $password = $_POST['password'] ?? '';
-        $is_admin = isset($_POST['is_admin']) ? 1 : 0;
+            if (empty($username)) {
+                $errors[] = 'Username is required.';
+            }
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $errors[] = 'Invalid email address.';
+            }
+            if ($action === 'add' && empty($password)) {
+                $errors[] = 'Password is required for new users.';
+            }
 
-        if (empty($username)) {
-            $errors[] = 'Username is required.';
-        }
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $errors[] = 'Invalid email address.';
-        }
-        if ($action === 'add' && empty($password)) {
-            $errors[] = 'Password is required for new customers.';
-        }
-
-        if (empty($errors)) {
-            try {
-                if ($action === 'add') {
-                    // Check for duplicate username or email
-                    $stmt = $db->prepare('SELECT COUNT(*) FROM customers WHERE username = ? OR email = ?');
-                    $stmt->execute([$username, $email]);
-                    if ($stmt->fetchColumn() > 0) {
-                        $errors[] = 'Username or email already exists.';
-                    } else {
-                        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-                        $stmt = $db->prepare('INSERT INTO customers (username, email, phone, password, is_admin) VALUES (?, ?, ?, ?, ?)');
-                        $stmt->execute([$username, $email, $phone ?: null, $hashed_password, $is_admin]);
-                        echo '<script>showToast("Customer added successfully!", "success"); setTimeout(() => location.reload(), 2000);</script>';
-                    }
-                } elseif ($action === 'edit') {
-                    $customer_id = filter_input(INPUT_POST, 'customer_id', FILTER_VALIDATE_INT);
-                    if ($customer_id) {
-                        // Check for duplicate username or email (excluding current customer)
-                        $stmt = $db->prepare('SELECT COUNT(*) FROM customers WHERE (username = ? OR email = ?) AND customer_id != ?');
-                        $stmt->execute([$username, $email, $customer_id]);
+            if (empty($errors)) {
+                try {
+                    if ($action === 'add') {
+                        // Check for duplicate username or email
+                        $stmt = $db->prepare('SELECT COUNT(*) FROM customers WHERE username = ? OR email = ?');
+                        $stmt->execute([$username, $email]);
                         if ($stmt->fetchColumn() > 0) {
                             $errors[] = 'Username or email already exists.';
                         } else {
-                            $params = [$username, $email, $phone ?: null, $is_admin, $customer_id];
-                            $sql = 'UPDATE customers SET username = ?, email = ?, phone = ?, is_admin = ?';
-                            if (!empty($password)) {
-                                $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-                                $sql .= ', password = ?';
-                                $params[] = $hashed_password;
-                            }
-                            $sql .= ' WHERE customer_id = ?';
-                            $stmt = $db->prepare($sql);
-                            $stmt->execute($params);
-                            echo '<script>showToast("Customer updated successfully!", "success"); setTimeout(() => location.reload(), 2000);</script>';
+                            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+                            $stmt = $db->prepare('INSERT INTO customers (username, email, phone, password, is_admin) VALUES (?, ?, ?, ?, ?)');
+                            $stmt->execute([$username, $email, $phone ?: null, $hashed_password, $is_admin]);
+                            $_SESSION['success_message'] = 'Customer added successfully!';
                         }
-                    } else {
-                        $errors[] = 'Invalid customer ID.';
+                    } elseif ($action === 'edit') {
+                        $customer_id = filter_input(INPUT_POST, 'customer_id', FILTER_VALIDATE_INT);
+                        if ($customer_id) {
+                            // Check for duplicate username or email (excluding current customer)
+                            $stmt = $db->prepare('SELECT COUNT(*) FROM customers WHERE (username = ? OR email = ?) AND customer_id != ?');
+                            $stmt->execute([$username, $email, $customer_id]);
+                            if ($stmt->fetchColumn() > 0) {
+                                $errors[] = 'Username or email already exists.';
+                            } else {
+                                $params = [$username, $email, $phone ?: null, $is_admin, $customer_id];
+                                $sql = 'UPDATE customers SET username = ?, email = ?, phone = ?, is_admin = ?';
+                                if (!empty($password)) {
+                                    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+                                    $sql .= ', password = ?';
+                                    $params[] = $hashed_password;
+                                }
+                                $sql .= ' WHERE customer_id = ?';
+                                $stmt = $db->prepare($sql);
+                                $stmt->execute($params);
+                                $_SESSION['success_message'] = 'User updated successfully!';
+                            }
+                        } else {
+                            $errors[] = 'Invalid customer ID.';
+                        }
                     }
+                } catch (PDOException $e) {
+                    $errors[] = 'Database error: ' . $e->getMessage();
                 }
-            } catch (PDOException $e) {
-                $errors[] = 'Database error: ' . $e->getMessage();
+            }
+        } elseif ($action === 'delete') {
+            $customer_id = filter_input(INPUT_POST, 'customer_id', FILTER_VALIDATE_INT);
+            if ($customer_id) {
+                try {
+                    // Prevent deleting self
+                    if ($customer_id === $_SESSION['customer_id']) {
+                        $errors[] = 'You cannot delete your own account.';
+                    } else {
+                        // Check if last admin
+                        $stmt = $db->prepare('SELECT COUNT(*) FROM customers WHERE is_admin = 1');
+                        $stmt->execute();
+                        $admin_count = $stmt->fetchColumn();
+                        $stmt = $db->prepare('SELECT is_admin FROM customers WHERE customer_id = ?');
+                        $stmt->execute([$customer_id]);
+                        $is_admin = $stmt->fetchColumn();
+                        if ($is_admin && $admin_count <= 1) {
+                            $errors[] = 'Cannot delete the last admin account.';
+                        } else {
+                            $stmt = $db->prepare('DELETE FROM customers WHERE customer_id = ?');
+                            $stmt->execute([$customer_id]);
+                            $_SESSION['success_message'] = 'User deleted successfully!';
+                        }
+                    }
+                } catch (PDOException $e) {
+                    $errors[] = 'Database error: ' . $e->getMessage();
+                }
+            } else {
+                $errors[] = 'Invalid customer ID.';
             }
         }
-    } elseif ($action === 'delete') {
-        $customer_id = filter_input(INPUT_POST, 'customer_id', FILTER_VALIDATE_INT);
-        if ($customer_id) {
-            try {
-                // Prevent deleting self
-                if ($customer_id === $_SESSION['customer_id']) {
-                    $errors[] = 'You cannot delete your own account.';
-                } else {
-                    // Check if last admin
-                    $stmt = $db->prepare('SELECT COUNT(*) FROM customers WHERE is_admin = 1');
-                    $stmt->execute();
-                    $admin_count = $stmt->fetchColumn();
-                    $stmt = $db->prepare('SELECT is_admin FROM customers WHERE customer_id = ?');
-                    $stmt->execute([$customer_id]);
-                    $is_admin = $stmt->fetchColumn();
-                    if ($is_admin && $admin_count <= 1) {
-                        $errors[] = 'Cannot delete the last admin account.';
-                    } else {
-                        $stmt = $db->prepare('DELETE FROM customers WHERE customer_id = ?');
-                        $stmt->execute([$customer_id]);
-                        echo '<script>showToast("Customer deleted successfully!", "success"); setTimeout(() => location.reload(), 2000);</script>';
-                    }
-                }
-            } catch (PDOException $e) {
-                $errors[] = 'Database error: ' . $e->getMessage();
-            }
-        } else {
-            $errors[] = 'Invalid customer ID.';
+
+        if (!empty($errors)) {
+            $_SESSION['error_message'] = implode(' ', $errors);
         }
     }
 
-    if (!empty($errors)) {
-        $error_message = implode(' ', $errors);
-        echo '<script>showToast("' . addslashes($error_message) . '", "error");</script>';
-    }
+    // Redirect to prevent form resubmission
+    header('Location: manage_customers.php');
+    exit;
 }
 
 // Fetch all customers
@@ -129,26 +136,22 @@ $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Customers - Restaurant System</title>
+    <title>Manage Users - Restaurant System</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="../../assets/css/styles.css">
     <link rel="stylesheet" href="../../assets/css/reset.css">
     <style>
         /* Page-specific styles */
-        body {
-            font-family: 'Roboto', Arial, sans-serif;
-            background: linear-gradient(135deg, #f9f9f9 0%, #e0e0e0 100%);
-            margin: 0;
-        }
 
-        .admin-container {
-            width: 100%;
+        .admin-container-customers {
             display: flex;
             align-items: center;
             justify-content: center;
+            max-width: 1200px;
+            margin-left: 8%;
             box-shadow: none;
             min-height: 100vh;
-            background: linear-gradient(135deg, #f9f9f9 0%, #e0e0e0 100%);
+            background-color: #f9f9f9;
         }
 
         .dashboard-content {
@@ -380,7 +383,7 @@ $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
         @media (max-width: 600px) {
-            .admin-container {
+            .admin-container-customers {
                 flex-direction: column;
             }
 
@@ -402,14 +405,14 @@ $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </style>
 </head>
 <body>
-    <section class="admin-container">
+    <section class="admin-container-customers">
         <?php include '../../includes/admin_sidebar.php'; ?>
         <div class="dashboard-content">
-            <h1>Manage Customers</h1>
+            <h1>Manage Users</h1>
 
-            <!-- Add Customer Form -->
+            <!-- Add User Form -->
             <div class="form-container">
-                <h2>Add New Customer</h2>
+                <h2>Add New User</h2>
                 <form method="POST">
                     <input type="hidden" name="action" value="add">
                     <input type="hidden" name="csrf_token" value="<?php echo sanitize($csrf_token); ?>">
@@ -433,13 +436,13 @@ $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <input type="checkbox" id="is_admin" name="is_admin">
                         <label for="is_admin">Is Admin</label>
                     </div>
-                    <button type="submit" class="btn"><i class="fas fa-plus"></i> Add Customer</button>
+                    <button type="submit" class="btn"><i class="fas fa-plus"></i> Add User</button>
                 </form>
             </div>
 
-            <!-- Customer List -->
+            <!-- Users List -->
             <div class="table-container">
-                <h2>Current Customers</h2>
+                <h2>Current Users </h2>
                 <table class="table">
                     <thead>
                         <tr>
@@ -452,7 +455,7 @@ $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </thead>
                     <tbody>
                         <?php if (empty($customers)): ?>
-                            <tr><td colspan="5">No customers found.</td></tr>
+                            <tr><td colspan="5">No users found.</td></tr>
                         <?php else: ?>
                             <?php foreach ($customers as $customer): ?>
                                 <tr>
@@ -462,12 +465,7 @@ $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     <td class="admin-status"><?php echo $customer['is_admin'] ? 'Yes' : 'No'; ?></td>
                                     <td class="actions">
                                         <button class="btn edit-btn" data-customer='<?php echo json_encode($customer); ?>'><i class="fas fa-edit"></i> Edit</button>
-                                        <form method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this customer?');">
-                                            <input type="hidden" name="action" value="delete">
-                                            <input type="hidden" name="customer_id" value="<?php echo $customer['customer_id']; ?>">
-                                            <input type="hidden" name="csrf_token" value="<?php echo sanitize($csrf_token); ?>">
-                                            <button type="submit" class="btn"><i class="fas fa-trash"></i> Delete</button>
-                                        </form>
+                                        <button class="btn delete-btn" data-customer-id="<?php echo $customer['customer_id']; ?>"><i class="fas fa-trash"></i> Delete</button>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -476,10 +474,11 @@ $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 </table>
             </div>
 
-            <!-- Edit Customer Modal -->
-            <div class="modal" id="edit-customer-modal">
+        </div>
+        <!-- Edit Customer Modal -->
+        <div class="modal" id="edit-customer-modal">
                 <div class="modal-content">
-                    <h2>Edit Customer</h2>
+                    <h2>Edit User</h2>
                     <form method="POST" id="edit-customer-form">
                         <input type="hidden" name="action" value="edit">
                         <input type="hidden" name="customer_id" id="edit-customer-id">
@@ -504,15 +503,29 @@ $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <input type="checkbox" id="edit-is_admin" name="is_admin">
                             <label for="edit-is_admin">Is Admin</label>
                         </div>
-                        <button type="submit" class="btn"><i class="fas fa-save"></i> Update Customer</button>
+                        <button type="submit" class="btn"><i class="fas fa-save"></i> Update User</button>
                         <button type="button" class="btn" id="cancel-edit-btn"><i class="fas fa-times"></i> Cancel</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Delete Confirmation Modal -->
+            <div class="modal" id="delete-customer-modal">
+                <div class="modal-content">
+                    <h2>Confirm Deletion</h2>
+                    <p>Are you sure you want to delete this user?</p>
+                    <form method="POST" id="delete-customer-form">
+                        <input type="hidden" name="action" value="delete">
+                        <input type="hidden" name="customer_id" id="delete-customer-id">
+                        <input type="hidden" name="csrf_token" value="<?php echo sanitize($csrf_token); ?>">
+                        <button type="submit" class="btn"><i class="fas fa-trash"></i> Confirm</button>
+                        <button type="button" class="btn" id="cancel-delete-btn"><i class="fas fa-times"></i> Cancel</button>
                     </form>
                 </div>
             </div>
 
             <!-- Toast Notification -->
             <div class="toast" id="toast"></div>
-        </div>
     </section>
 
     <script>
@@ -524,9 +537,22 @@ $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 toast.className = `toast ${type} active`;
                 setTimeout(() => {
                     toast.className = "toast";
-                }, 3000);
+                }, 2000);
             }
         }
+
+        // Display session-based toast messages on page load
+        window.addEventListener("load", () => {
+            const successMessage = "<?php echo addslashes($_SESSION['success_message']); ?>";
+            const errorMessage = "<?php echo addslashes($_SESSION['error_message']); ?>";
+            if (successMessage) {
+                showToast(successMessage, "success");
+            } else if (errorMessage) {
+                showToast(errorMessage, "error");
+            }
+            // Clear session messages
+            <?php unset($_SESSION['success_message'], $_SESSION['error_message']); ?>
+        });
 
         // Edit customer modal
         const editModal = document.getElementById("edit-customer-modal");
@@ -552,6 +578,29 @@ $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
         editModal.addEventListener("click", (e) => {
             if (e.target === editModal) {
                 editModal.classList.remove("active");
+            }
+        });
+
+        // Delete customer modal
+        const deleteModal = document.getElementById("delete-customer-modal");
+        const deleteForm = document.getElementById("delete-customer-form");
+        const cancelDeleteBtn = document.getElementById("cancel-delete-btn");
+
+        document.querySelectorAll(".delete-btn").forEach(button => {
+            button.addEventListener("click", () => {
+                const customerId = button.getAttribute("data-customer-id");
+                document.getElementById("delete-customer-id").value = customerId;
+                deleteModal.classList.add("active");
+            });
+        });
+
+        cancelDeleteBtn.addEventListener("click", () => {
+            deleteModal.classList.remove("active");
+        });
+
+        deleteModal.addEventListener("click", (e) => {
+            if (e.target === deleteModal) {
+                deleteModal.classList.remove("active");
             }
         });
     </script>

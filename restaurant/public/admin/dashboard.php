@@ -32,31 +32,23 @@ $active_page = 'dashboard.php';
     <link rel="stylesheet" href="../../assets/css/reset.css">
     <style>
         /* Page-specific styles */
-        body {
-            font-family: 'Roboto', Arial, sans-serif;
-            background-color: white;
-            margin: 0;
-            padding: 0;
-        }
 
         .admin-container {
             display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background-color: white;
+            background-color: #f9f9f9;
+            min-height: 80vh; /* Allow natural height with minimum */
         }
 
         .dashboard-content {
             flex: 1;
-            width: 100%;
+            max-width: 1200px;
             margin: 3rem auto;
-            margin-left: 200px; /* Sidebar width + gap */
-            padding: 2.5rem;
-            box-shadow: none;
+            margin-left: 270px; /* Sidebar width (250px) + gap */
+            padding: 2rem;
             background-color: white;
             border-radius: 10px;
-            transition: transform 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, margin 0.3s ease;
         }
 
         .dashboard-content:hover {
@@ -122,23 +114,65 @@ $active_page = 'dashboard.php';
 
         @media (max-width: 768px) {
             .dashboard-content {
-                margin-left: 220px; /* Adjusted for sidebar */
-                max-width: 500px;
-                margin: 2rem auto;
-                padding: 2rem;
+                margin-left: 220px; /* Sidebar width (200px) + gap */
+                max-width: 90%;
+                padding: 1.5rem;
+            }
+
+            .dashboard-content h1 {
+                font-size: 1.8rem;
+            }
+
+            .admin-info h2,
+            .statistics-placeholder h2 {
+                font-size: 1.3rem;
+            }
+
+            .admin-info p,
+            .statistics-placeholder p {
+                font-size: 1rem;
             }
         }
 
         @media (max-width: 600px) {
             .admin-container {
                 flex-direction: column;
+                padding-top: 60px; /* Space for fixed header */
             }
 
             .dashboard-content {
-                margin-left: auto;
-                max-width: 100%;
+                margin-left: 0;
                 margin: 1rem;
-                padding: 1.5rem;
+                max-width: 95%;
+                padding: 1rem;
+            }
+
+            .dashboard-content h1 {
+                font-size: 1.6rem;
+            }
+
+            .admin-info {
+                padding: 1rem;
+            }
+
+            .admin-info h2 {
+                font-size: 1.2rem;
+            }
+
+            .admin-info p {
+                font-size: 0.9rem;
+            }
+
+            .statistics-placeholder {
+                padding: 1rem;
+            }
+
+            .statistics-placeholder h2 {
+                font-size: 1.2rem;
+            }
+
+            .statistics-placeholder p {
+                font-size: 0.9rem;
             }
         }
     </style>
