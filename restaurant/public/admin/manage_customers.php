@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
                             $stmt = $db->prepare('INSERT INTO customers (username, email, phone, password, is_admin) VALUES (?, ?, ?, ?, ?)');
                             $stmt->execute([$username, $email, $phone ?: null, $hashed_password, $is_admin]);
-                            $_SESSION['success_message'] = 'Customer added successfully!';
+                            $_SESSION['success_message'] = 'User added successfully!';
                         }
                     } elseif ($action === 'edit') {
                         $customer_id = filter_input(INPUT_POST, 'customer_id', FILTER_VALIDATE_INT);
@@ -683,8 +683,11 @@ $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 </table>
             </div>
 
-            <!-- Toast Notification -->
-            <div class="toast" id="toast"></div>
+            
+    </section>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
         </div>
         <!-- Edit Customer Modal -->
         <div class="modal" id="edit-customer-modal">
@@ -734,7 +737,6 @@ $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 </form>
             </div>
         </div>
-    </section>
 
     <script>
         // Show toast notification

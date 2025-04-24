@@ -32,8 +32,8 @@ $redirect_delay = 10; // Seconds before redirect
     <p class="success">You have been successfully logged out.</p>
     <p>You will be redirected to the homepage in <span id="countdown"><?php echo $redirect_delay; ?></span> seconds, or click below to return now.</p>
     <div class="hero-buttons">
-        <a href="index.php" class="logout-btn">Return to Homepage</a>
-        <a href="login.php" class="logout-btn">Log In Again</a>
+        <a href="index.php" class="btn">Return to Homepage</a>
+        <a href="login.php" class="btn">Log In Again</a>
     </div>
 </section>
 
