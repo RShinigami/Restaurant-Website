@@ -165,6 +165,7 @@ $menu_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <title>Manage Menu Items - Restaurant System</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="../../assets/css/styles.css">
+    <link rel="stylesheet" href="../../assets/css/reset.css">
     <style>
         body {
             font-family: 'Roboto', Arial, sans-serif;
@@ -206,7 +207,7 @@ $menu_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
             font-weight: 600;
         }
 
-        h2 {
+        .form-container h2, .modal-content h2, .table-container h2 {
             color: #a52a2a;
             font-size: 1.5rem;
             margin: 1.5rem 0 1rem;
@@ -602,7 +603,7 @@ $menu_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         document.getElementById("edit-category").value = item.category;
                         document.getElementById("edit-description").value = item.description || "";
                         document.getElementById("current-image").innerHTML = item.image_path 
-                            ? `<a href="/restaurant-system/${item.image_path}" target="_blank">${item.image_path}</a>` 
+                            ? `<a href="/restaurant/public/${item.image_path}" target="_blank">${item.image_path}</a>` 
                             : 'No image';
                         document.getElementById("edit-menu-item-modal").classList.add("active");
                     } catch (e) {
