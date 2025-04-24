@@ -28,6 +28,7 @@ $active_page = 'dashboard.php';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Restaurant System</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <link rel="stylesheet" href="../../assets/css/styles.css">
     <link rel="stylesheet" href="../../assets/css/reset.css">
     <style>
@@ -44,74 +45,48 @@ $active_page = 'dashboard.php';
             margin: clamp(1rem, 2vw, 1.5rem) auto;
             margin-left: calc(250px + 1.5rem); /* Sidebar (250px) + gap */
             padding: clamp(1rem, 2vw, 1.5rem);
+            transition: margin 0.3s ease, padding 0.3s ease;
+        }
+
+        .admin-header {
             background: #fff;
-            border-radius: 6px;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
-            transition: transform 0.3s ease, margin 0.3s ease, padding 0.3s ease;
+            padding: clamp(0.8rem, 1.5vw, 1.2rem);
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: fadeInDown 0.5s ease-out;
         }
 
-        .dashboard-content:hover {
-            transform: translateY(-2px);
-        }
-
-        .dashboard-content h1 {
+        .admin-header h1 {
             color: #a52a2a;
-            font-size: clamp(1.6rem, 3.5vw, 2rem);
-            margin-bottom: 1.2rem;
-            text-align: center;
+            font-size: clamp(1.4rem, 3vw, 1.8rem);
             font-weight: 600;
+            margin: 0;
         }
 
         .admin-info {
-            background: #fff;
-            padding: clamp(0.8rem, 1.5vw, 1.2rem);
-            border-radius: 5px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-            margin-bottom: 1.5rem;
-        }
-
-        .admin-info h2 {
-            color: #a52a2a;
-            font-size: clamp(1.2rem, 2.5vw, 1.5rem);
-            margin-bottom: 0.8rem;
-            text-align: center;
-            font-weight: 500;
-        }
-
-        .admin-info p {
-            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            font-size: clamp(0.85rem, 2vw, 1rem);
             color: #333;
-            margin: 0.5rem 0;
             display: flex;
             align-items: center;
+            gap: 0.5rem;
         }
 
-        .admin-info p i {
+        .admin-info i {
             color: #a52a2a;
-            margin-right: 0.6rem;
-            font-size: clamp(1rem, 2.2vw, 1.2rem);
-        }
-
-        .statistics-placeholder {
-            text-align: center;
-            padding: clamp(0.8rem, 1.5vw, 1.2rem);
-            background: #fff;
-            border-radius: 5px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-        }
-
-        .statistics-placeholder h2 {
-            color: #a52a2a;
-            font-size: clamp(1.2rem, 2.5vw, 1.5rem);
-            margin-bottom: 0.8rem;
-        }
-
-        .statistics-placeholder p {
-            color: #555;
             font-size: clamp(0.9rem, 2vw, 1.1rem);
         }
 
-        /* Sidebar width adjustment */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: clamp(1rem, 2vw, 1.5rem);
+            margin-top: 1.5rem;
+        }
+
         @media (max-width: 768px) {
             .dashboard-content {
                 margin-left: calc(200px + 1rem); /* Sidebar (200px) + gap */
@@ -119,26 +94,11 @@ $active_page = 'dashboard.php';
                 padding: clamp(0.8rem, 1.5vw, 1.2rem);
             }
 
-            .dashboard-content h1 {
-                font-size: clamp(1.5rem, 3.2vw, 1.9rem);
-            }
-
-            .admin-info h2,
-            .statistics-placeholder h2 {
-                font-size: clamp(1.1rem, 2.2vw, 1.4rem);
-            }
-
-            .admin-info p,
-            .statistics-placeholder p {
-                font-size: clamp(0.85rem, 1.8vw, 1rem);
-            }
-
-            .admin-info p i {
-                font-size: clamp(0.9rem, 2vw, 1.1rem);
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
 
-        /* Navbar transition */
         @media (max-width: 600px) {
             .admin-container {
                 flex-direction: column;
@@ -152,36 +112,24 @@ $active_page = 'dashboard.php';
                 padding: clamp(0.6rem, 1.2vw, 1rem);
             }
 
-            .dashboard-content h1 {
-                font-size: clamp(1.4rem, 3vw, 1.8rem);
+            .admin-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+                padding: clamp(0.6rem, 1.2vw, 1rem);
+            }
+
+            .admin-header h1 {
+                font-size: clamp(1.3rem, 2.8vw, 1.7rem);
             }
 
             .admin-info {
-                padding: clamp(0.6rem, 1.2vw, 1rem);
+                font-size: clamp(0.8rem, 1.8vw, 0.95rem);
             }
 
-            .admin-info h2 {
-                font-size: clamp(1rem, 2vw, 1.3rem);
-            }
-
-            .admin-info p {
-                font-size: clamp(0.8rem, 1.6vw, 0.95rem);
-            }
-
-            .admin-info p i {
-                font-size: clamp(0.8rem, 1.6vw, 1rem);
-            }
-
-            .statistics-placeholder {
-                padding: clamp(0.6rem, 1.2vw, 1rem);
-            }
-
-            .statistics-placeholder h2 {
-                font-size: clamp(1rem, 2vw, 1.3rem);
-            }
-
-            .statistics-placeholder p {
-                font-size: clamp(0.8rem, 1.6vw, 0.95rem);
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
             }
         }
     </style>
@@ -190,15 +138,15 @@ $active_page = 'dashboard.php';
     <section class="admin-container">
         <?php include '../../includes/admin_sidebar.php'; ?>
         <div class="dashboard-content">
-            <h1>Admin Dashboard</h1>
-            <div class="admin-info">
-                <h2>Welcome, <?php echo sanitize($admin['username']); ?>!</h2>
-                <p><i class="fas fa-envelope"></i> Email: <?php echo sanitize($admin['email']); ?></p>
-                <p><i class="fas fa-phone"></i> Phone: <?php echo sanitize($admin['phone'] ?: 'N/A'); ?></p>
+            <div class="admin-header animate__animated animate__fadeInDown">
+                <h1>Admin Dashboard</h1>
+                <div class="admin-info">
+                    <i class="fas fa-user"></i>
+                    <span><?php echo sanitize($admin['username']); ?> | <?php echo sanitize($admin['email']); ?> | <?php echo sanitize($admin['phone'] ?: 'N/A'); ?></span>
+                </div>
             </div>
-            <div class="statistics-placeholder">
-                <h2>Statistics & Charts</h2>
-                <p>Placeholder for statistics and charts (to be implemented later).</p>
+            <div class="stats-grid">
+                <?php include '../../includes/statistics.php'; ?>
             </div>
         </div>
     </section>
