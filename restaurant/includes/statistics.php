@@ -151,19 +151,19 @@ $reservation_statuses = [
 
         <!-- Charts -->
         <div class="charts-container">
-            <div class="chart-card animate__animated animate__fadeIn">
+            <div class="chart-card">
                 <h3>Activity Per Month (Last 12 Months)</h3>
                 <canvas id="activityChart"></canvas>
             </div>
-            <div class="chart-card animate__animated animate__fadeIn">
+            <div class="chart-card">
                 <h3>Reservation Status</h3>
                 <canvas id="statusChart"></canvas>
             </div>
-            <div class="chart-card animate__animated animate__fadeIn">
+            <div class="chart-card">
                 <h3>Top 5 Ordered Items</h3>
                 <canvas id="itemsChart"></canvas>
             </div>
-            <div class="chart-card animate__animated animate__fadeIn">
+            <div class="chart-card">
                 <h3>Top 5 Reserved Tables</h3>
                 <canvas id="tablesChart"></canvas>
             </div>
@@ -174,6 +174,9 @@ $reservation_statuses = [
 <style>
     .stats-container {
         width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: clamp(1.5rem, 2.5vw, 2rem);
     }
 
     .no-data {
@@ -190,7 +193,7 @@ $reservation_statuses = [
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: clamp(1rem, 2vw, 1.5rem);
-        margin-bottom: 1.5rem;
+        width: 100%;
     }
 
     .stat-card {
@@ -229,7 +232,8 @@ $reservation_statuses = [
     .charts-container {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        gap: clamp(1rem, 2vw, 1.5rem);
+        gap: clamp(1.5rem, 2.5vw, 2rem);
+        width: 100%;
     }
 
     .chart-card {
@@ -237,6 +241,7 @@ $reservation_statuses = [
         padding: clamp(1rem, 2vw, 1.5rem);
         border-radius: 8px;
         box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e0e0e0;
         transition: transform 0.3s ease;
     }
 
@@ -254,9 +259,11 @@ $reservation_statuses = [
 
     .chart-card canvas {
         max-width: 100%;
-        height: clamp(200px, 40vw, 300px);
+        max-height: 350px;
+        height: clamp(300px, 50vw, 400px);
         margin: 0 auto;
         display: block;
+        aspect-ratio: 4 / 3;
     }
 
     @media (max-width: 768px) {
@@ -304,18 +311,34 @@ $reservation_statuses = [
         }
 
         .chart-card canvas {
-            height: clamp(180px, 50vw, 250px);
+            height: clamp(250px, 60vw, 350px);
+            max-height: 350px;
         }
     }
 </style>
 
-<script src="/assets/js/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 <script>
-    // Assume /assets/js/chart.js includes Chart.js
     document.addEventListener('DOMContentLoaded', () => {
+        let charts = []; // Store chart instances
+
+        // Gradient helper function
+        const createGradient = (ctx, chartArea, colorStart, colorEnd) => {
+            const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+            gradient.addColorStop(0, colorStart);
+            gradient.addColorStop(1, colorEnd);
+            return gradient;
+        };
+
+        // Destroy existing charts to prevent memory leaks
+        const destroyCharts = () => {
+            charts.forEach(chart => chart.destroy());
+            charts = [];
+        };
+
         // Activity Chart (Bar)
         const activityCtx = document.getElementById('activityChart').getContext('2d');
-        new Chart(activityCtx, {
+        const activityChart = new Chart(activityCtx, {
             type: 'bar',
             data: {
                 labels: <?php echo json_encode($months); ?>,
@@ -323,14 +346,12 @@ $reservation_statuses = [
                     {
                         label: 'Reservations',
                         data: <?php echo json_encode($reservations_per_month); ?>,
-                        backgroundColor: 'rgba(165, 42, 42, 0.7)',
                         borderColor: 'rgba(165, 42, 42, 1)',
                         borderWidth: 1
                     },
                     {
                         label: 'Orders',
                         data: <?php echo json_encode($orders_per_month); ?>,
-                        backgroundColor: 'rgba(40, 167, 69, 0.7)',
                         borderColor: 'rgba(40, 167, 69, 1)',
                         borderWidth: 1
                     }
@@ -340,8 +361,8 @@ $reservation_statuses = [
                 responsive: true,
                 maintainAspectRatio: false,
                 animation: {
-                    duration: 1000,
-                    easing: 'easeOutQuart'
+                    duration: 800,
+                    easing: 'easeOutQuad'
                 },
                 scales: {
                     y: {
@@ -382,10 +403,26 @@ $reservation_statuses = [
                 }
             }
         });
+        charts.push(activityChart);
+
+        // Set gradients for Activity Chart
+        activityChart.data.datasets[0].backgroundColor = createGradient(
+            activityCtx,
+            activityChart.chartArea,
+            'rgba(165, 42, 42, 0.7)',
+            'rgba(165, 42, 42, 0.3)'
+        );
+        activityChart.data.datasets[1].backgroundColor = createGradient(
+            activityCtx,
+            activityChart.chartArea,
+            'rgba(40, 167, 69, 0.7)',
+            'rgba(40, 167, 69, 0.3)'
+        );
+        activityChart.update();
 
         // Reservation Status Chart (Doughnut)
         const statusCtx = document.getElementById('statusChart').getContext('2d');
-        new Chart(statusCtx, {
+        const statusChart = new Chart(statusCtx, {
             type: 'doughnut',
             data: {
                 labels: ['Pending', 'Confirmed', 'Cancelled'],
@@ -394,11 +431,6 @@ $reservation_statuses = [
                         <?php echo $reservation_stats['pending_reservations']; ?>,
                         <?php echo $reservation_stats['confirmed_reservations']; ?>,
                         <?php echo $reservation_stats['cancelled_reservations']; ?>
-                    ],
-                    backgroundColor: [
-                        'rgba(255, 193, 7, 0.7)',
-                        'rgba(40, 167, 69, 0.7)',
-                        'rgba(220, 53, 69, 0.7)'
                     ],
                     borderColor: [
                         'rgba(255, 193, 7, 1)',
@@ -412,8 +444,8 @@ $reservation_statuses = [
                 responsive: true,
                 maintainAspectRatio: false,
                 animation: {
-                    duration: 1000,
-                    easing: 'easeOutQuart'
+                    duration: 800,
+                    easing: 'easeOutQuad'
                 },
                 plugins: {
                     legend: {
@@ -429,22 +461,24 @@ $reservation_statuses = [
                 }
             }
         });
+        charts.push(statusChart);
+
+        // Set gradients for Status Chart
+        statusChart.data.datasets[0].backgroundColor = [
+            createGradient(statusCtx, statusChart.chartArea, 'rgba(255, 193, 7, 0.7)', 'rgba(255, 193, 7, 0.3)'),
+            createGradient(statusCtx, statusChart.chartArea, 'rgba(40, 167, 69, 0.7)', 'rgba(40, 167, 69, 0.3)'),
+            createGradient(statusCtx, statusChart.chartArea, 'rgba(220, 53, 69, 0.7)', 'rgba(220, 53, 69, 0.3)')
+        ];
+        statusChart.update();
 
         // Top Items Chart (Pie)
         const itemsCtx = document.getElementById('itemsChart').getContext('2d');
-        new Chart(itemsCtx, {
+        const itemsChart = new Chart(itemsCtx, {
             type: 'pie',
             data: {
                 labels: <?php echo json_encode($item_names); ?>,
                 datasets: [{
                     data: <?php echo json_encode($item_quantities); ?>,
-                    backgroundColor: [
-                        'rgba(165, 42, 42, 0.7)',
-                        'rgba(40, 167, 69, 0.7)',
-                        'rgba(0, 123, 255, 0.7)',
-                        'rgba(255, 193, 7, 0.7)',
-                        'rgba(111, 66, 193, 0.7)'
-                    ],
                     borderColor: [
                         'rgba(165, 42, 42, 1)',
                         'rgba(40, 167, 69, 1)',
@@ -459,8 +493,8 @@ $reservation_statuses = [
                 responsive: true,
                 maintainAspectRatio: false,
                 animation: {
-                    duration: 1000,
-                    easing: 'easeOutQuart'
+                    duration: 800,
+                    easing: 'easeOutQuad'
                 },
                 plugins: {
                     legend: {
@@ -476,17 +510,27 @@ $reservation_statuses = [
                 }
             }
         });
+        charts.push(itemsChart);
+
+        // Set gradients for Items Chart
+        itemsChart.data.datasets[0].backgroundColor = [
+            createGradient(itemsCtx, itemsChart.chartArea, 'rgba(165, 42, 42, 0.7)', 'rgba(165, 42, 42, 0.3)'),
+            createGradient(itemsCtx, itemsChart.chartArea, 'rgba(40, 167, 69, 0.7)', 'rgba(40, 167, 69, 0.3)'),
+            createGradient(itemsCtx, itemsChart.chartArea, 'rgba(0, 123, 255, 0.7)', 'rgba(0, 123, 255, 0.3)'),
+            createGradient(itemsCtx, itemsChart.chartArea, 'rgba(255, 193, 7, 0.7)', 'rgba(255, 193, 7, 0.3)'),
+            createGradient(itemsCtx, itemsChart.chartArea, 'rgba(111, 66, 193, 0.7)', 'rgba(111, 66, 193, 0.3)')
+        ];
+        itemsChart.update();
 
         // Top Tables Chart (Bar)
         const tablesCtx = document.getElementById('tablesChart').getContext('2d');
-        new Chart(tablesCtx, {
+        const tablesChart = new Chart(tablesCtx, {
             type: 'bar',
             data: {
                 labels: <?php echo json_encode($table_labels); ?>,
                 datasets: [{
                     label: 'Reservations',
                     data: <?php echo json_encode($table_counts); ?>,
-                    backgroundColor: 'rgba(165, 42, 42, 0.7)',
                     borderColor: 'rgba(165, 42, 42, 1)',
                     borderWidth: 1
                 }]
@@ -495,8 +539,8 @@ $reservation_statuses = [
                 responsive: true,
                 maintainAspectRatio: false,
                 animation: {
-                    duration: 1000,
-                    easing: 'easeOutQuart'
+                    duration: 800,
+                    easing: 'easeOutQuad'
                 },
                 scales: {
                     y: {
@@ -535,5 +579,18 @@ $reservation_statuses = [
                 }
             }
         });
+        charts.push(tablesChart);
+
+        // Set gradient for Tables Chart
+        tablesChart.data.datasets[0].backgroundColor = createGradient(
+            tablesCtx,
+            tablesChart.chartArea,
+            'rgba(165, 42, 42, 0.7)',
+            'rgba(165, 42, 42, 0.3)'
+        );
+        tablesChart.update();
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', destroyCharts);
     });
 </script>

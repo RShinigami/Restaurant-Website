@@ -3,7 +3,7 @@ require_once '../config/db.php';
 require_once '../includes/functions.php';
 secureSessionStart();
 
-clearDB($db);
+//clearDB($db);
 
 if (isAdmin()) {
     // Redirect to admin dashboard if logged in as admin

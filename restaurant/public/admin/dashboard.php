@@ -3,7 +3,7 @@ require_once '../../config/db.php';
 require_once '../../includes/functions.php';
 secureSessionStart();
 
-clearDB($db);
+//clearDB($db);
 
 // Restrict to admins
 if (!isset($_SESSION['customer_id']) || !$_SESSION['is_admin']) {
@@ -32,125 +32,138 @@ $active_page = 'dashboard.php';
     <link rel="stylesheet" href="../../assets/css/styles.css">
     <link rel="stylesheet" href="../../assets/css/reset.css">
     <style>
-        .admin-container {
-            display: flex;
+        .dash-wrapper {
             background-color: #f9f9f9;
-            min-height: 80vh;
-            transition: padding-top 0.3s ease;
-        }
-
-        .dashboard-content {
-            flex: 1;
-            max-width: min(1200px, 94vw);
-            margin: clamp(1rem, 2vw, 1.5rem) auto;
-            margin-left: calc(250px + 1.5rem); /* Sidebar (250px) + gap */
+            min-height: 100vh;
             padding: clamp(1rem, 2vw, 1.5rem);
-            transition: margin 0.3s ease, padding 0.3s ease;
-        }
-
-        .admin-header {
-            background: #fff;
-            padding: clamp(0.8rem, 1.5vw, 1.2rem);
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-            margin-bottom: 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            animation: fadeInDown 0.5s ease-out;
-        }
-
-        .admin-header h1 {
-            color: #a52a2a;
-            font-size: clamp(1.4rem, 3vw, 1.8rem);
-            font-weight: 600;
             margin: 0;
         }
 
-        .admin-info {
-            font-size: clamp(0.85rem, 2vw, 1rem);
-            color: #333;
+        .insights-panel {
+            max-width: min(1280px, 94vw);
+            margin: clamp(1.5rem, 2.5vw, 2rem) auto;
+            margin-left: calc(250px + 2rem); /* Sidebar (250px) + gap */
+            padding: clamp(1.2rem, 2vw, 1.8rem);
+            transition: margin-left 0.3s ease, padding 0.3s ease;
+        }
+
+        .admin-profile-card {
+            background: #fff;
+            padding: clamp(1rem, 2vw, 1.5rem);
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+            margin-bottom: 2rem;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 1rem;
+            animation: fadeInUp 0.6s ease-out;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
-        .admin-info i {
+        .admin-profile-card:hover {
+            transform: scale(1.03);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .admin-profile-card i {
             color: #a52a2a;
-            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            font-size: clamp(1.8rem, 3.5vw, 2.2rem);
         }
 
-        .stats-grid {
+        .admin-profile-card div {
+            flex: 1;
+        }
+
+        .admin-profile-card h2 {
+            color: #333;
+            font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+            font-weight: 600;
+            margin: 0 0 0.5rem;
+        }
+
+        .admin-profile-card p {
+            color: #555;
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            margin: 0;
+        }
+
+        .insights-title {
+            color: #a52a2a;
+            font-size: clamp(1.8rem, 3.5vw, 2.2rem);
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .insights-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: clamp(1rem, 2vw, 1.5rem);
-            margin-top: 1.5rem;
+            grid-template-columns: 1fr;
+            gap: clamp(1.5rem, 2.5vw, 2rem);
         }
 
         @media (max-width: 768px) {
-            .dashboard-content {
-                margin-left: calc(200px + 1rem); /* Sidebar (200px) + gap */
+            .insights-panel {
+                margin-left: calc(200px + 1.5rem); /* Sidebar (200px) + gap */
                 max-width: 95vw;
-                padding: clamp(0.8rem, 1.5vw, 1.2rem);
-            }
-
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
+                padding: clamp(1rem, 1.8vw, 1.5rem);
             }
         }
 
         @media (max-width: 600px) {
-            .admin-container {
-                flex-direction: column;
-                padding-top: 60px; /* Space for navbar */
+            .dash-wrapper {
+                padding: clamp(0.8rem, 1.5vw, 1.2rem);
             }
 
-            .dashboard-content {
+            .insights-panel {
+                margin: clamp(1rem, 2vw, 1.5rem);
                 margin-left: 0;
-                margin: clamp(0.8rem, 1.8vw, 1rem);
                 max-width: 96vw;
-                padding: clamp(0.6rem, 1.2vw, 1rem);
+                padding: clamp(0.8rem, 1.5vw, 1.2rem);
             }
 
-            .admin-header {
+            .admin-profile-card {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 0.5rem;
-                padding: clamp(0.6rem, 1.2vw, 1rem);
+                padding: clamp(0.8rem, 1.5vw, 1.2rem);
             }
 
-            .admin-header h1 {
-                font-size: clamp(1.3rem, 2.8vw, 1.7rem);
+            .admin-profile-card i {
+                font-size: clamp(1.6rem, 3vw, 2rem);
             }
 
-            .admin-info {
-                font-size: clamp(0.8rem, 1.8vw, 0.95rem);
+            .admin-profile-card h2 {
+                font-size: clamp(1.1rem, 2.2vw, 1.4rem);
             }
 
-            .stats-grid {
-                grid-template-columns: 1fr;
-                gap: 1rem;
+            .admin-profile-card p {
+                font-size: clamp(0.85rem, 1.8vw, 1rem);
+            }
+
+            .insights-title {
+                font-size: clamp(1.6rem, 3vw, 2rem);
             }
         }
     </style>
 </head>
 <body>
-    <section class="admin-container">
+    <div class="dash-wrapper">
         <?php include '../../includes/admin_sidebar.php'; ?>
-        <div class="dashboard-content">
-            <div class="admin-header animate__animated animate__fadeInDown">
-                <h1>Admin Dashboard</h1>
-                <div class="admin-info">
-                    <i class="fas fa-user"></i>
-                    <span><?php echo sanitize($admin['username']); ?> | <?php echo sanitize($admin['email']); ?> | <?php echo sanitize($admin['phone'] ?: 'N/A'); ?></span>
+        <section class="insights-panel">
+            <div class="admin-profile-card" role="button" aria-label="Admin Profile">
+                <i class="fas fa-user-circle"></i>
+                <div>
+                    <h2><?php echo sanitize($admin['username']); ?></h2>
+                    <p><?php echo sanitize($admin['email']); ?> | <?php echo sanitize($admin['phone'] ?: 'N/A'); ?></p>
                 </div>
             </div>
-            <div class="stats-grid">
+            <h2 class="insights-title">Restaurant Insights</h2>
+            <div class="insights-grid">
                 <?php include '../../includes/statistics.php'; ?>
             </div>
-        </div>
-    </section>
-
-    <?php include '../../includes/footer.php'; ?>
+        </section>
+        <?php include '../../includes/footer.php'; ?>
+    </div>
 </body>
 </html>
