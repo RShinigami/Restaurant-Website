@@ -13,72 +13,79 @@ if (!isset($_SESSION['customer_id']) || !$_SESSION['is_admin']) {
 $csrf_token = generateCsrfToken();
 $active_page = 'manage_tables.php';
 
+// Initialize session messages
+$_SESSION['success_message'] = $_SESSION['success_message'] ?? '';
+$_SESSION['error_message'] = $_SESSION['error_message'] ?? '';
+
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!validateCsrfToken($_POST['csrf_token'])) {
-        die('Invalid CSRF token.');
-    }
+        $_SESSION['error_message'] = 'Invalid CSRF token.';
+    } else {
+        $action = $_POST['action'] ?? '';
+        $errors = [];
 
-    $action = $_POST['action'] ?? '';
-    $errors = [];
+        if ($action === 'add' || $action === 'edit') {
+            $table_number = filter_input(INPUT_POST, 'table_number', FILTER_VALIDATE_INT);
+            $capacity = filter_input(INPUT_POST, 'capacity', FILTER_VALIDATE_INT);
+            $description = filter_input(INPUT_POST, 'description', FILTER_SANITIZE_SPECIAL_CHARS);
 
-    if ($action === 'add' || $action === 'edit') {
-        $table_number = filter_input(INPUT_POST, 'table_number', FILTER_VALIDATE_INT);
-        $capacity = filter_input(INPUT_POST, 'capacity', FILTER_VALIDATE_INT);
-        $description = filter_input(INPUT_POST, 'description', FILTER_SANITIZE_SPECIAL_CHARS);
+            if ($table_number < 1) {
+                $errors[] = 'Invalid table number.';
+            }
+            if ($capacity < 1) {
+                $errors[] = 'Invalid capacity.';
+            }
 
-        if ($table_number < 1) {
-            $errors[] = 'Invalid table number.';
-        }
-        if ($capacity < 1) {
-            $errors[] = 'Invalid capacity.';
-        }
-
-        if (empty($errors)) {
-            try {
-                if ($action === 'add') {
-                    $stmt = $db->prepare('INSERT INTO tables (table_number, capacity, description) VALUES (?, ?, ?)');
-                    $stmt->execute([$table_number, $capacity, $description ?: null]);
-                    echo '<script>showToast("Table added successfully!", "success"); setTimeout(() => location.reload(), 2000);</script>';
-                } elseif ($action === 'edit') {
-                    $table_id = filter_input(INPUT_POST, 'table_id', FILTER_VALIDATE_INT);
-                    if ($table_id) {
-                        $stmt = $db->prepare('UPDATE tables SET table_number = ?, capacity = ?, description = ? WHERE table_id = ?');
-                        $stmt->execute([$table_number, $capacity, $description ?: null, $table_id]);
-                        echo '<script>showToast("Table updated successfully!", "success"); setTimeout(() => location.reload(), 2000);</script>';
-                    } else {
-                        $errors[] = 'Invalid table ID.';
+            if (empty($errors)) {
+                try {
+                    if ($action === 'add') {
+                        $stmt = $db->prepare('INSERT INTO tables (table_number, capacity, description) VALUES (?, ?, ?)');
+                        $stmt->execute([$table_number, $capacity, $description ?: null]);
+                        $_SESSION['success_message'] = 'Table added successfully!';
+                    } elseif ($action === 'edit') {
+                        $table_id = filter_input(INPUT_POST, 'table_id', FILTER_VALIDATE_INT);
+                        if ($table_id) {
+                            $stmt = $db->prepare('UPDATE tables SET table_number = ?, capacity = ?, description = ? WHERE table_id = ?');
+                            $stmt->execute([$table_number, $capacity, $description ?: null, $table_id]);
+                            $_SESSION['success_message'] = 'Table updated successfully!';
+                        } else {
+                            $errors[] = 'Invalid table ID.';
+                        }
                     }
+                } catch (PDOException $e) {
+                    $errors[] = 'Database error: ' . $e->getMessage();
                 }
-            } catch (PDOException $e) {
-                $errors[] = 'Database error: ' . $e->getMessage();
+            }
+        } elseif ($action === 'delete') {
+            $table_id = filter_input(INPUT_POST, 'table_id', FILTER_VALIDATE_INT);
+            if ($table_id) {
+                try {
+                    $stmt = $db->prepare('SELECT COUNT(*) FROM reservations_orders WHERE table_number = (SELECT table_number FROM tables WHERE table_id = ?) AND status IN (?, ?)');
+                    $stmt->execute([$table_id, 'pending', 'confirmed']);
+                    if ($stmt->fetchColumn() > 0) {
+                        $errors[] = 'Cannot delete table with active reservations.';
+                    } else {
+                        $stmt = $db->prepare('DELETE FROM tables WHERE table_id = ?');
+                        $stmt->execute([$table_id]);
+                        $_SESSION['success_message'] = 'Table deleted successfully!';
+                    }
+                } catch (PDOException $e) {
+                    $errors[] = 'Database error: ' . $e->getMessage();
+                }
+            } else {
+                $errors[] = 'Invalid table ID.';
             }
         }
-    } elseif ($action === 'delete') {
-        $table_id = filter_input(INPUT_POST, 'table_id', FILTER_VALIDATE_INT);
-        if ($table_id) {
-            try {
-                $stmt = $db->prepare('SELECT COUNT(*) FROM reservations_orders WHERE table_number = (SELECT table_number FROM tables WHERE table_id = ?) AND status IN (?, ?)');
-                $stmt->execute([$table_id, 'pending', 'confirmed']);
-                if ($stmt->fetchColumn() > 0) {
-                    $errors[] = 'Cannot delete table with active reservations.';
-                } else {
-                    $stmt = $db->prepare('DELETE FROM tables WHERE table_id = ?');
-                    $stmt->execute([$table_id]);
-                    echo '<script>showToast("Table deleted successfully!", "success"); setTimeout(() => location.reload(), 2000);</script>';
-                }
-            } catch (PDOException $e) {
-                $errors[] = 'Database error: ' . $e->getMessage();
-            }
-        } else {
-            $errors[] = 'Invalid table ID.';
+
+        if (!empty($errors)) {
+            $_SESSION['error_message'] = implode(' ', $errors);
         }
     }
 
-    if (!empty($errors)) {
-        $error_message = implode(' ', $errors);
-        echo '<script>showToast("' . addslashes($error_message) . '", "error");</script>';
-    }
+    // Redirect to prevent form resubmission
+    header('Location: manage_tables.php');
+    exit;
 }
 
 // Fetch all tables and upcoming reservations
@@ -442,12 +449,7 @@ foreach ($reservations as $res) {
                                     </td>
                                     <td class="actions">
                                         <button class="btn edit-btn" data-table='<?php echo json_encode($table); ?>'><i class="fas fa-edit"></i> Edit</button>
-                                        <form method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this table?');">
-                                            <input type="hidden" name="action" value="delete">
-                                            <input type="hidden" name="table_id" value="<?php echo $table['table_id']; ?>">
-                                            <input type="hidden" name="csrf_token" value="<?php echo sanitize($csrf_token); ?>">
-                                            <button type="submit" class="btn"><i class="fas fa-trash"></i> Delete</button>
-                                        </form>
+                                        <button class="btn delete-btn" data-table-id="<?php echo $table['table_id']; ?>"><i class="fas fa-trash"></i> Delete</button>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -455,9 +457,9 @@ foreach ($reservations as $res) {
                     </tbody>
                 </table>
             </div>
-
-            <!-- Edit Table Modal -->
-            <div class="modal" id="edit-table-modal">
+        </div>
+        <!-- Edit Table Modal -->
+        <div class="modal" id="edit-table-modal">
                 <div class="modal-content">
                     <h2>Edit Table</h2>
                     <form method="POST" id="edit-table-form">
@@ -482,9 +484,21 @@ foreach ($reservations as $res) {
                 </div>
             </div>
 
-            <!-- Toast Notification -->
-            <div class="toast" id="toast"></div>
-        </div>
+            <!-- Delete Confirmation Modal -->
+            <div class="modal" id="delete-table-modal">
+                <div class="modal-content">
+                    <h2>Confirm Deletion</h2>
+                    <p>Are you sure you want to delete this table?</p>
+                    <form method="POST" id="delete-table-form">
+                        <input type="hidden" name="action" value="delete">
+                        <input type="hidden" name="table_id" id="delete-table-id">
+                        <input type="hidden" name="csrf_token" value="<?php echo sanitize($csrf_token); ?>">
+                        <button type="submit" class="btn"><i class="fas fa-trash"></i> Confirm</button>
+                        <button type="button" class="btn" id="cancel-delete-btn"><i class="fas fa-times"></i> Cancel</button>
+                    </form>
+                </div>
+            </div>
+        <div class="toast" id="toast"></div>
     </section>
 
     <script>
@@ -496,9 +510,22 @@ foreach ($reservations as $res) {
                 toast.className = `toast ${type} active`;
                 setTimeout(() => {
                     toast.className = "toast";
-                }, 3000);
+                }, 2000);
             }
         }
+
+        // Display session-based toast messages on page load
+        window.addEventListener("load", () => {
+            const successMessage = "<?php echo addslashes($_SESSION['success_message']); ?>";
+            const errorMessage = "<?php echo addslashes($_SESSION['error_message']); ?>";
+            if (successMessage) {
+                showToast(successMessage, "success");
+            } else if (errorMessage) {
+                showToast(errorMessage, "error");
+            }
+            // Clear session messages
+            <?php unset($_SESSION['success_message'], $_SESSION['error_message']); ?>
+        });
 
         // Edit table modal
         const editModal = document.getElementById("edit-table-modal");
@@ -523,6 +550,29 @@ foreach ($reservations as $res) {
         editModal.addEventListener("click", (e) => {
             if (e.target === editModal) {
                 editModal.classList.remove("active");
+            }
+        });
+
+        // Delete table modal
+        const deleteModal = document.getElementById("delete-table-modal");
+        const deleteForm = document.getElementById("delete-table-form");
+        const cancelDeleteBtn = document.getElementById("cancel-delete-btn");
+
+        document.querySelectorAll(".delete-btn").forEach(button => {
+            button.addEventListener("click", () => {
+                const tableId = button.getAttribute("data-table-id");
+                document.getElementById("delete-table-id").value = tableId;
+                deleteModal.classList.add("active");
+            });
+        });
+
+        cancelDeleteBtn.addEventListener("click", () => {
+            deleteModal.classList.remove("active");
+        });
+
+        deleteModal.addEventListener("click", (e) => {
+            if (e.target === deleteModal) {
+                deleteModal.classList.remove("active");
             }
         });
     </script>
