@@ -1,6 +1,3 @@
-/* Custom styles for Restaurant System */
-
-/* General */
 body {
   background-color: #f9f9f9;
   color: #333;
@@ -230,19 +227,29 @@ nav ul li a:hover {
 }
 .slider-track[data-category="Pasta"] {
   animation: slide-right-30s 30s linear infinite;
+  -webkit-animation: slide-right-30s 30s linear infinite;
 }
 .slider-track[data-category="Pizza"] {
   animation: slide-left-15s 15s linear infinite;
+  -webkit-animation: slide-left-15s 15s linear infinite;
 }
 .slider-track[data-category="Dessert"] {
   animation: slide-right-20s 20s linear infinite;
+  -webkit-animation: slide-right-20s 20s linear infinite;
 }
 .slider-track[data-category="Beverage"] {
   animation: slide-left-25s 25s linear infinite;
+  -webkit-animation: slide-left-25s 25s linear infinite;
 }
 .slider-track[data-category="Side"] {
   animation: slide-right-30s 30s linear infinite;
+  -webkit-animation: slide-right-30s 30s linear infinite;
 }
+.slider-track[data-category="Soup"] {
+  animation: slide-left-15s 15s linear infinite;
+  -webkit-animation: slide-left-15s 15s linear infinite;
+}
+
 .slider-item {
   flex: 0 0 25%;
   padding: 0 0.5rem;

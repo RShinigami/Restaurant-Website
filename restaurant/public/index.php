@@ -33,7 +33,7 @@ if (isLoggedIn()) {
     }
 }
 
-// Placeholder restaurant images (replace with actual images in /public/uploads)
+
 $restaurant_images = [
     ['title' => 'Restaurant Interior', 'image_path' => 'uploads/restaurant_interior.jpg'],
     ['title' => 'Outdoor Seating', 'image_path' => 'uploads/outdoor_seating.jpg'],
@@ -41,7 +41,7 @@ $restaurant_images = [
     ['title' => 'Dessert Display', 'image_path' => 'uploads/dessert_display.jpg'],
 ];
 
-// Placeholder chef images (replace with actual images in /public/uploads)
+
 $chef_images = [
     ['title' => 'Chef John', 'image_path' => 'uploads/chef_john.jpg'],
     ['title' => 'Chef Maria', 'image_path' => 'uploads/chef_maria.jpg'],
@@ -49,7 +49,7 @@ $chef_images = [
     ['title' => 'Chef Sarah', 'image_path' => 'uploads/chef_sarah.jpg'],
 ];
 
-// Logo path
+
 $logo_path = '../assets/images/logo.png';
 ?>
 

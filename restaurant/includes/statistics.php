@@ -7,8 +7,7 @@ if (!isset($_SESSION['is_admin']) || !$_SESSION['is_admin']) {
     exit('Unauthorized access');
 }
 
-// Fetch statistics
-// Reservation counts
+
 $stmt = $db->prepare('
     SELECT 
         COUNT(*) as total_reservations,
@@ -21,7 +20,7 @@ $stmt = $db->prepare('
 $stmt->execute(['reservation']);
 $reservation_stats = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// Order counts
+
 $stmt = $db->prepare('
     SELECT 
         COUNT(*) as total_orders,
@@ -34,7 +33,7 @@ $stmt = $db->prepare('
 $stmt->execute(['order']);
 $order_stats = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// Total revenue
+
 $stmt = $db->prepare('
     SELECT SUM(oi.quantity * m.price) as total_revenue
     FROM order_items oi
@@ -45,7 +44,7 @@ $stmt = $db->prepare('
 $stmt->execute(['order']);
 $total_revenue = $stmt->fetch(PDO::FETCH_ASSOC)['total_revenue'] ?? 0.0;
 
-// Monthly reservations and orders (last 12 months)
+
 $stmt = $db->prepare('
     SELECT 
         strftime("%Y-%m", date_time) as month,
@@ -59,7 +58,7 @@ $stmt = $db->prepare('
 $stmt->execute();
 $monthly_data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Top 5 ordered items
+
 $stmt = $db->prepare('
     SELECT 
         m.name,
@@ -75,7 +74,7 @@ $stmt = $db->prepare('
 $stmt->execute(['order']);
 $top_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Top 5 tables
+
 $stmt = $db->prepare('
     SELECT 
         t.table_number,
@@ -91,7 +90,7 @@ $stmt = $db->prepare('
 $stmt->execute(['reservation']);
 $top_tables = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Prepare chart data
+
 $months = [];
 $reservations_per_month = [];
 $orders_per_month = [];
@@ -120,7 +119,7 @@ $reservation_statuses = [
     <?php if (!$reservation_stats['total_reservations'] && !$order_stats['total_orders']): ?>
         <p class="no-data animate__animated animate__fadeIn">No activity to display.</p>
     <?php else: ?>
-        <!-- Stat Cards -->
+        
         <div class="stat-cards animate__animated animate__fadeInUp">
             <div class="stat-card">
                 <i class="fas fa-calendar-check"></i>
@@ -149,7 +148,7 @@ $reservation_statuses = [
             </div>
         </div>
 
-        <!-- Charts -->
+        
         <div class="charts-container">
             <div class="chart-card">
                 <h3>Activity Per Month (Last 12 Months)</h3>

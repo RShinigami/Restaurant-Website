@@ -22,7 +22,7 @@ session_destroy();
 // Start a new session for CSRF token or future use
 secureSessionStart();
 
-// Optional: Redirect after a delay (handled by JavaScript)
+
 $redirect_delay = 10; // Seconds before redirect
 ?>
 

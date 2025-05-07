@@ -1,4 +1,3 @@
-// Custom JavaScript for Restaurant System
 
 document.addEventListener("DOMContentLoaded", () => {
   const navToggle = document.querySelector(".nav-toggle");

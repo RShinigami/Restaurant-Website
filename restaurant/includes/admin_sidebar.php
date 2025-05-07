@@ -1,5 +1,5 @@
 <?php
-// includes/admin_sidebar.php
+
 $active_page = $active_page ?? basename($_SERVER['PHP_SELF']);
 ?>
 
