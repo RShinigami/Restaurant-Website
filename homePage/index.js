@@ -8,7 +8,7 @@ document.querySelectorAll(".nav-link").forEach((link) => {
       const targetElement = document.getElementById(targetId);
       if (targetElement) {
         window.scrollTo({
-          top: targetElement.offsetTop - 60, // Adjust for navbar height
+          top: targetElement.offsetTop - 60,
           behavior: "smooth",
         });
       }
@@ -22,17 +22,33 @@ const navLinks = document.querySelector(".nav-links");
 
 menuToggle.addEventListener("click", () => {
   navLinks.classList.toggle("active");
-  const isActive = navLinks.classList.contains("active");
-  menuToggle.querySelectorAll("span").forEach((span, index) => {
-    if (isActive) {
-      if (index === 0)
-        span.style.transform = "rotate(45deg) translate(5px, 5px)";
-      if (index === 1) span.style.opacity = "0";
-      if (index === 2)
-        span.style.transform = "rotate(-45deg) translate(7px, -7px)";
-    } else {
-      span.style.transform = "none";
-      span.style.opacity = "1";
-    }
-  });
+  menuToggle.classList.toggle("active");
+});
+
+// Navbar shadow on scroll
+window.addEventListener("scroll", () => {
+  const navbar = document.querySelector(".navbar");
+  if (window.scrollY > 50) {
+    navbar.classList.add("scrolled");
+  } else {
+    navbar.classList.remove("scrolled");
+  }
+});
+
+// Fade-in animation for sections on scroll
+const sections = document.querySelectorAll("section");
+const observer = new IntersectionObserver(
+  (entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("visible");
+      }
+    });
+  },
+  { threshold: 0.1 }
+);
+
+sections.forEach((section) => {
+  section.classList.add("fade-in");
+  observer.observe(section);
 });
