@@ -778,6 +778,5 @@ foreach ($reservations as $res) {
         });
     </script>
 
-    <?php include '../../includes/footer.php'; ?>
 </body>
 </html>

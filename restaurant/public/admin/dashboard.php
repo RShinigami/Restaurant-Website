@@ -163,7 +163,6 @@ $active_page = 'dashboard.php';
                 <?php include '../../includes/statistics.php'; ?>
             </div>
         </section>
-        <?php include '../../includes/footer.php'; ?>
     </div>
 </body>
 </html>

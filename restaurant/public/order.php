@@ -188,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.getElementById('place-order-btn').disabled = true;
                     // Redirect to account.php
                     setTimeout(() => {
-                        window.location.href = 'account.php';
+                        window.location.href = 'account.php#orders';
                     }, 2000);
                 }
             })

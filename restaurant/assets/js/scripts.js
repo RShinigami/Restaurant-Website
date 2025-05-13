@@ -138,7 +138,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Forgot password placeholder
+  // Forgot password (not implemented yet xD)
   const forgotPasswordLink = document.getElementById("forgot-password");
   if (forgotPasswordLink) {
     forgotPasswordLink.addEventListener("click", (e) => {

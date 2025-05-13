@@ -879,6 +879,5 @@ $menu_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
         });
     </script>
 
-    <?php include '../../includes/footer.php'; ?>
 </body>
 </html>

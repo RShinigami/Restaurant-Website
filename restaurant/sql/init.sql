@@ -98,8 +98,7 @@
 -- --     description TEXT
 -- -- );
 
--- -- -- Seed initial data (matches previous hardcoded table_capacities)
--- -- INSERT OR IGNORE INTO tables (table_number, capacity, description) VALUES
+-- -- INSERT INTO tables (table_number, capacity, description) VALUES
 -- -- (1, 2, 'Small window table'),
 -- -- (2, 2, 'Small corner table'),
 -- -- (3, 2, 'Small center table'),
