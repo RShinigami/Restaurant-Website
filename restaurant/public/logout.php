@@ -19,11 +19,11 @@ if (ini_get("session.use_cookies")) {
 }
 session_destroy();
 
-// Start a new session for CSRF token or future use
+// Start a new session for future use
 secureSessionStart();
 
 
-$redirect_delay = 10; // Seconds before redirect
+$redirect_delay = 5; // Seconds before redirect
 ?>
 
 <?php include '../includes/header.php'; ?>

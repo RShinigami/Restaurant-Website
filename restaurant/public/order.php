@@ -153,7 +153,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 </section>
 
 <script>
-// Toast notification (inline to avoid scripts.js dependency for this page)
+// Toast notification 
 function showToast(message, type) {
     const toast = document.getElementById('toast');
     toast.textContent = message;

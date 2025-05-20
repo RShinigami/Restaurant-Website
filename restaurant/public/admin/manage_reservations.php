@@ -280,7 +280,7 @@ try {
             font-size: clamp(0.9rem, 2vw, 1.1rem);
         }
 
-        /* Scroll shadow for table */
+        
         .table-container::before,
         .table-container::after {
             content: '';
@@ -313,10 +313,10 @@ try {
             opacity: 1;
         }
 
-        /* Sidebar width adjustment */
+        
         @media (max-width: 768px) {
             .dashboard-content {
-                margin-left: calc(200px + 1rem); /* Sidebar (200px) + gap */
+                margin-left: calc(200px + 1rem); 
                 max-width: 95vw;
                 padding: clamp(0.8rem, 1.5vw, 1.2rem);
             }
